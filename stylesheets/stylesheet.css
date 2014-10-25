@@ -1,3 +1,5 @@
+@import url(http://fonts.googleapis.com/css?family=Ranchers);
+
 body {
   margin: 0;
   padding: 0;
@@ -7,8 +9,6 @@ body {
   line-height: 1.5;
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
 }
-
-/* General & 'Reset' Stuff */
 
 .container {
   width: 90%;
