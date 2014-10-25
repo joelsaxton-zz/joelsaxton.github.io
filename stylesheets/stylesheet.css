@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Ranchers);
+@import url(http://fonts.googleapis.com/css?family=Orbitron:400,900);
 
 body {
   margin: 0;
@@ -50,7 +50,7 @@ header h1 {
   line-height: 1.5;
   margin: 0 0 0 -40px;
   font-weight: bold;
-  font-family: 'Ranchers', cursive;
+  font-family: 'Orbitron', sans-serif;
   color: #b5e853;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1),
                0 0 5px rgba(181, 232, 83, 0.1),
