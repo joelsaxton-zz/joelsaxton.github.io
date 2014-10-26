@@ -3,7 +3,6 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/planets.css" media="screen">
@@ -16,45 +15,20 @@
     <header>
       <div class="container">
         <h1>Joelsaxton.github.io</h1>
-
         <section id="downloads">
           <a href="https://github.com/joelsaxton" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
         </section>
       </div>
     </header>
 
-
-    <div class="bodies" id="sun"></div>
-    <div class="orbit" id="mercury-orbit">
-        <div class="bodies" id="mercury"></div>
+<div id="solar-system"></div>
+    <div id="display">
+        <select id="choose-system">
+        <option class="system-option" name="Sol" value="Sol" selected="selected">SOL</option>
+        <option class="system-option" name="HD-10180" value="HD-10180" selected="selected">HD-10180</option>
+        <option class="system-option" name="Gliese-581" value="Gliese-581" selected="selected">Gliese-581</option>
+        </select>
     </div>
-    <div class="orbit" id="venus-orbit">
-        <div class="bodies" id="venus"></div>
-    </div>
-    <div class="orbit" id="earth-orbit">
-        <div class="bodies" id="earth"></div>
-    </div>
-    <div class="orbit" id="mars-orbit">
-        <div class="bodies" id="mars"></div>
-    </div>
-    <div class="orbit" id="jupiter-orbit">
-        <div class="bodies" id="jupiter"></div>
-    </div>
-    <div class="orbit" id="saturn-orbit">
-        <div class="bodies" id="saturn"></div>
-    </div>
-    <div class="orbit" id="uranus-orbit">
-        <div class="bodies" id="uranus"></div>
-    </div>
-    <div class="orbit" id="neptune-orbit">
-        <div class="bodies" id="neptune"></div>
-    </div>
-    <div class="orbit" id="pluto-orbit">
-        <div class="bodies" id="pluto"></div>
-    </div>
-
-    <div id="display"><span id="year"></span></div>
     <div id="info">(press 'f' to go faster, 's' to go slower)</div>
-    
   </body>
 </html>

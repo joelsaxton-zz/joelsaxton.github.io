@@ -1,83 +1,108 @@
 
-var secondsPerYear = 1;
-var orbitSizes = [6, 9, 13, 18, 26, 36, 52, 74, 100];
-var bodySizes = [32, 1, 4, 4, 2, 16, 14, 9, 8, 1];
-var periods = [0.24, 0.62, 1, 1.88, 11.86, 29.46, 84.01, 164.8, 248];
-var year = 561; // 561 BCE, the year when the planets were 'kinda' lined up
-var suffix = "BCE";
+var secondsPerYear = 1; // Sol only (for other systems it is seconds per day)
+var sizeFactor = 750;
 
-// Build solar system, set up vars, set up key event handlers, and other stuff
+// Solar system objects
+var systems = {
+    'Sol' : {'names' : ['Sol', 'Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'],
+        'orbitSizes' : [0, 5, 9, 14, 24, 78, 143, 288, 450],
+        'bodySizes' : [12, 1, 2, 2, 1, 7, 5, 4, 4],
+        'periods' : [0, 0.24, 0.62, 1, 1.88, 11.86, 29.46, 84.01, 164.8],
+        'colors' : ['yellow', 'lightgray', 'lightgreen', 'blue', 'red', 'orange', 'yellow', 'blue', 'blue']
+    },
+    'HD-10180' : {'names' : ['HD-10180', 'b', 'c', 'i', 'd', 'e', 'j', 'f', 'g', 'h'],
+        'orbitSizes' : [0, 5, 10, 16, 22, 27, 33, 49, 141, 349],
+        'bodySizes' : [13, 1, 3, 1, 3, 5, 2, 5, 5, 6],
+        'periods' : [0, 0.1, 0.6, 1, 1.6, 4.9, 6.7, 12.2, 59.6, 230],
+        'colors' : ['yellow', 'lightgray', 'lightgreen', 'blue', 'red', 'brown', 'purple', 'yellow', 'orange', 'yellow']
+    },
+    'Gliese-581' : {'names' : ['Gliese-581', 'e', 'b', 'c'],
+        'orbitSizes' : [0, 3, 4, 7],
+        'bodySizes' : [20, 6, 10, 4],
+        'periods' : [0, 3, 5, 13],
+        'colors' : ['red', 'pink', 'orange', 'blue']
+    }
+}
+
+// Build solar system, set up vars, set up key event handlers, etc.
 window.onload = function(){
-
+    var selectedSystem = document.getElementById('choose-system');
     buildSolarSystem();
+    setKeyCommands();
 
-    var yearSpan = document.getElementById('year');
-    yearSpan.textContent = year + " " + suffix;
-    var yearTimer = setInterval(function() { displayYear(yearSpan); }, secondsPerYear * 1000);
+    // Resize or Recreate solar system to fit new screen size or in response to dropdown
+    window.onresize = selectedSystem.onchange = buildSolarSystem;
+}
 
+function buildSolarSystem()
+{
+    var container = document.getElementById('solar-system');
+    container.innerHTML = '';
+    var selected = document.getElementById('choose-system');
+    var index = selected.options[selected.selectedIndex].value;
+    var system = systems[index];
+    var names = system.names;
+    var orbitSizes = system.orbitSizes;
+    var bodySizes = system.bodySizes;
+    var periods = system.periods;
+    var colors = system.colors;
+
+    // Create Star
+    var star = document.createElement('div');
+    var windowSize = window.innerHeight;
+    var sunSize = (bodySizes[0] * windowSize) / sizeFactor;
+    var max = windowSize - (sunSize * 2);
+    var orbitModifier = max / orbitSizes[orbitSizes.length - 1]; // Orbit of outer planet will be max
+    star.className = "bodies";
+    star.id = "sun";
+    star.style.height = star.style.width = sunSize + "px";
+    star.style.marginTop = star.style.marginLeft = -sunSize/2 + "px";
+    star.style.backgroundColor = colors[0];
+    container.appendChild(star);
+
+    // Create Planets
+    for(var i = 1; i < names.length; i++) {
+        var orbit = orbitSizes[i] * orbitModifier;
+        var size = (bodySizes[i] * max) / sizeFactor;
+        var outer = document.createElement('div');
+        outer.className = "orbit";
+        outer.style.width = outer.style.height = orbit + sunSize + "px";
+        outer.style.marginTop = outer.style.marginLeft = -(orbit + sunSize)/2 + "px";
+        outer.style['-webkit-animation'] = "spin-right " + periods[i] * secondsPerYear + "s linear infinite";
+        outer.style['-moz-animation'] = "spin-right " + periods[i] * secondsPerYear + "s linear infinite";
+        outer.style['-ms-animation'] = "spin-right " + periods[i] * secondsPerYear + "s linear infinite";
+        outer.style['-o-animation'] = "spin-right " + periods[i] * secondsPerYear + "s linear infinite";
+        outer.style.animation = "spin-right " + periods[i] * secondsPerYear + "s linear infinite";
+        var inner = document.createElement('div');
+        inner.className = "bodies planet";
+        inner.id = names[i];
+        inner.style.width = inner.style.height = size + "px";
+        inner.style.marginLeft = inner.style.marginTop = -size/2 + "px";
+        inner.style.backgroundColor = colors[i];
+        outer.appendChild(inner);
+        container.appendChild(outer);
+    }
+
+}
+
+function setKeyCommands()
+{
+    // Press 'f' to speed up planets, 's' to slow them down
     document.onkeydown = function(evt) {
         evt = evt || window.event;
-        console.log(evt);
+
         if (evt.keyCode == 70) {
             secondsPerYear = (secondsPerYear / 1.2).toFixed(2);
-            console.log("you pressed f. Seconds per year now: " + secondsPerYear);
+            buildSolarSystem();
         }
 
         if (evt.keyCode == 83) {
             secondsPerYear = (secondsPerYear * 1.2).toFixed(2);
-            console.log("you pressed s. Seconds per year now: " + secondsPerYear);
+            buildSolarSystem();
         }
-
-        clearInterval(yearTimer);
-
-        var orbits = document.getElementsByClassName('orbit');
-        for(var i = 0; i < orbits.length; i++) {
-            orbits[i].style.animation = "spin-right " + periods[i] * secondsPerYear + "s linear infinite";
-        }
-        yearTimer = setInterval(function() { displayYear(yearSpan); }, secondsPerYear * 1000);
     };
 }
 
-// Resize solar system
-window.onresize = buildSolarSystem;
-
-
-function buildSolarSystem()
-{
-    var offset = window.innerHeight / 90;
-    var max = window.innerHeight - offset;
-    var orbits = document.getElementsByClassName('orbit');
-    var bodies = document.getElementsByClassName('bodies');
-
-    for(var i = 0; i < orbits.length; i++) {
-        var orbit = (orbitSizes[i] * max) / 100;
-        orbits[i].style.width = orbits[i].style.height = orbit + "px";
-        orbits[i].style.marginTop = orbits[i].style.marginLeft = -orbit/2 + "px";
-        orbits[i].style.animation = "spin-right " + periods[i] * secondsPerYear + "s linear infinite";
-    }
-
-    for(var i = 0; i < bodies.length; i++) {
-        var size = (bodySizes[i] * max) / 1000;
-        bodies[i].style.width = bodies[i].style.height = size + "px";
-        bodies[i].style.marginLeft = bodies[i].style.marginTop = -size/2 + "px";
-    }
-}
-
-function displayYear(yearSpan)
-{
-    if (suffix == "BCE") {
-        year--;
-        if (year == 0){
-            suffix = "CE";
-        }
-    }
-
-    if (suffix == "CE") {
-        year++;
-    }
-
-    yearSpan.textContent = year + " " + suffix;
-}
 
 
 
