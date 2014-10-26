@@ -15,14 +15,16 @@ html, body {
     font-family: "Helvetica Neue Light", "Lucida Grande", "Calibri", "Arial", sans-serif;
 }
 
-
-#info {
-    color:green;
-    font-size:10px;
-    font-family: "Helvetica Neue Light", "Lucida Grande", "Calibri", "Arial", sans-serif;
-    top: 10px;
+#controls {
+    top: 7px;
     left: 120px;
     position:absolute;
+}
+
+#slider {
+    border-radius: 5px;
+    height: 10px;
+    width:60px;
 }
 
 .system-option, #choose-system{

@@ -27,8 +27,9 @@ var systems = {
 // Build solar system, set up vars, set up key event handlers, etc.
 window.onload = function(){
     var selectedSystem = document.getElementById('choose-system');
+    var slider = document.getElementById('slider');
     buildSolarSystem();
-    setKeyCommands();
+    setSliderCommands();
 
     // Resize or Recreate solar system to fit new screen size or in response to dropdown
     window.onresize = selectedSystem.onchange = buildSolarSystem;
@@ -85,21 +86,11 @@ function buildSolarSystem()
 
 }
 
-function setKeyCommands()
+function setSliderCommands()
 {
-    // Press 'f' to speed up planets, 's' to slow them down
-    document.onkeydown = function(evt) {
-        evt = evt || window.event;
-
-        if (evt.keyCode == 70) {
-            secondsPerYear = (secondsPerYear / 1.2).toFixed(2);
-            buildSolarSystem();
-        }
-
-        if (evt.keyCode == 83) {
-            secondsPerYear = (secondsPerYear * 1.2).toFixed(2);
-            buildSolarSystem();
-        }
+    slider.onchange = function() {
+        secondsPerYear = 1/this.value;
+        buildSolarSystem();
     };
 }
 
