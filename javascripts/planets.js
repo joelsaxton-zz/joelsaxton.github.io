@@ -48,6 +48,9 @@ function buildSolarSystem()
     var periods = system.periods;
     var colors = system.colors;
 
+    // Create background
+    makeBackgroundStars();
+
     // Create Star
     var star = document.createElement('div');
     var windowSize = window.innerHeight;
@@ -92,6 +95,28 @@ function setSliderCommands()
         secondsPerYear = 1/this.value;
         buildSolarSystem();
     };
+}
+
+function makeBackgroundStars()
+{
+    var height = window.innerHeight;
+    var width = window.innerWidth;
+    var stars = document.getElementById('stars');
+    var numStars = width / 8;
+    stars.style.backgroundSize = width + 'px ' + height + 'px';
+    var style = '';
+    for (var i = 0; i < numStars; i++){
+        var x = Math.floor(Math.random() * width);
+        var y = Math.floor(Math.random() * height);
+        var size = 1;
+        if (i > width/10) { // Just to make higher proportion of smaller stars
+            size = 2;
+        }
+        console.log(size);
+        style += 'radial-gradient(' + size + 'px ' + size + 'px at ' + x + 'px ' + y + 'px, #EEEEEE, rgba(255,255,255,0)),';
+    }
+    style = style.slice(0, -1);
+    stars.style.backgroundImage = style;
 }
 
 

@@ -6,7 +6,7 @@ html, body {
     overflow: hidden;
 }
 
-#space, .stars {
+#space {
     overflow: hidden;
     position: absolute;
     top: 0;
@@ -15,16 +15,9 @@ html, body {
     right: 0;
 }
 
-.stars {
-    background-image:
-    radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 50px 160px, #ddd, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 90px 40px, #eee, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 160px 120px, #ddd, rgba(0,0,0,0));
-    background-repeat: repeat;
-    background-size: 200px 200px;
+#stars {
+    height: 100%;
+    width: 100%;
 }
 
 #display {
