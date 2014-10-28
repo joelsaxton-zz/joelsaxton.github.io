@@ -36,9 +36,9 @@ html, body {
 }
 
 #slider, #zoom-slider {
-    border-radius: 5px;
-    height: 10px;
-    width:60px;
+    border-radius: 2px;
+    height: 5px;
+    width:50px;
 }
 
 .system-option, #choose-system{
