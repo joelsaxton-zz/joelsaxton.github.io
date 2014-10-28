@@ -35,7 +35,7 @@ html, body {
     position:absolute;
 }
 
-#slider {
+#slider, #zoom-slider {
     border-radius: 5px;
     height: 10px;
     width:60px;
