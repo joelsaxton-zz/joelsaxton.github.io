@@ -1,6 +1,7 @@
 
 var secondsPerYear = 1; // Sol only (for other systems it is seconds per day)
 var sizeFactor = 750;
+var zoom = 1;
 
 // Solar system objects
 var systems = {
@@ -28,11 +29,14 @@ var systems = {
 window.onload = function(){
     var selectedSystem = document.getElementById('choose-system');
     var slider = document.getElementById('slider');
+    var zoomSlider = document.getElementById('zoom-slider');
+
     buildSolarSystem();
-    setSliderCommands();
+    setSliderCommands(slider, zoomSlider);
+    makeBackgroundStars();
 
     // Resize or Recreate solar system to fit new screen size or in response to dropdown
-    window.onresize = selectedSystem.onchange = buildSolarSystem;
+    selectedSystem.onchange = window.onresize = buildSolarSystem;
 }
 
 function buildSolarSystem()
@@ -50,7 +54,7 @@ function buildSolarSystem()
 
     // Create Star
     var star = document.createElement('div');
-    var windowSize = window.innerHeight;
+    var windowSize = window.innerHeight * zoom;
     var sunSize = (bodySizes[0] * windowSize) / sizeFactor;
     var max = windowSize - (sunSize * 2);
     var orbitModifier = max / orbitSizes[orbitSizes.length - 1]; // Orbit of outer planet will be max
@@ -64,7 +68,7 @@ function buildSolarSystem()
     // Create Planets
     for(var i = 1; i < names.length; i++) {
         var orbit = orbitSizes[i] * orbitModifier;
-        var size = (bodySizes[i] * max) / sizeFactor;
+        var planetSize = (bodySizes[i] * max) / sizeFactor;
         var outer = document.createElement('div');
         outer.className = "orbit";
         outer.style.width = outer.style.height = orbit + sunSize + "px";
@@ -77,8 +81,8 @@ function buildSolarSystem()
         var inner = document.createElement('div');
         inner.className = "bodies planet";
         inner.id = names[i];
-        inner.style.width = inner.style.height = size + "px";
-        inner.style.marginLeft = inner.style.marginTop = -size/2 + "px";
+        inner.style.width = inner.style.height = planetSize + "px";
+        inner.style.marginLeft = inner.style.marginTop = -planetSize/2 + "px";
         inner.style.backgroundColor = colors[i];
         outer.appendChild(inner);
         container.appendChild(outer);
@@ -86,12 +90,38 @@ function buildSolarSystem()
 
 }
 
-function setSliderCommands()
+function setSliderCommands(slider, zoomSlider)
 {
     slider.onchange = function() {
         secondsPerYear = 1/this.value;
         buildSolarSystem();
     };
+
+    zoomSlider.onchange = function() {
+        zoom = this.value;
+        buildSolarSystem();
+    };
+}
+
+function makeBackgroundStars()
+{
+    var height = window.innerHeight;
+    var width = window.innerWidth;
+    var stars = document.getElementById('stars');
+    var numStars = width / 8;
+    stars.style.backgroundSize = width + 'px ' + height + 'px';
+    var style = '';
+    for (var i = 0; i < numStars; i++){
+        var x = Math.floor(Math.random() * width);
+        var y = Math.floor(Math.random() * height);
+        var size = 1;
+        if (i > width/10) { // Just to make higher proportion of smaller stars
+            size = 2;
+        }
+        style += 'radial-gradient(' + size + 'px ' + size + 'px at ' + x + 'px ' + y + 'px, #EEEEEE, rgba(255,255,255,0)),';
+    }
+    style = style.slice(0, -1);
+    stars.style.backgroundImage = style;
 }
 
 

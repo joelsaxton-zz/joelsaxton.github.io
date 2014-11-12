@@ -6,6 +6,20 @@ html, body {
     overflow: hidden;
 }
 
+#space {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+#stars {
+    height: 100%;
+    width: 100%;
+}
+
 #display {
     position:absolute;
     top: 4px;
@@ -21,10 +35,10 @@ html, body {
     position:absolute;
 }
 
-#slider {
-    border-radius: 5px;
-    height: 10px;
-    width:60px;
+#slider, #zoom-slider {
+    border-radius: 2px;
+    height: 5px;
+    width:50px;
 }
 
 .system-option, #choose-system{
@@ -33,6 +47,7 @@ html, body {
 .bodies {
     position: absolute;
     border-radius:50%;
+    box-shadow: 0 0 1px white;
 }
 
 .planet {
