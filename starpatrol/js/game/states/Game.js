@@ -23,6 +23,7 @@ StarPatrol.Game = function(){
     this.MISSILE_DISCHARGE = 50;
     this.health = 100;
     this.isBurning = false;
+    this.isAlive = true;
 };
 
 StarPatrol.Game.prototype = {
@@ -87,6 +88,8 @@ StarPatrol.Game.prototype = {
         this.reloadedText.tint = 0x66CD00; // '#66CD00'
         this.batteryText.tint = 0xFF0000; // '#FF0000'
         this.scoreText.fixedToCamera = true;
+        this.reloadedText.fixedToCamera = true;
+        this.batteryText.fixedToCamera = true;
 
 
         this.jetSound = this.game.add.audio('rocket');
@@ -257,45 +260,48 @@ StarPatrol.Game.prototype = {
     },
 
     playerAsteroidHit: function(player, asteroid) {
-        asteroid.kill();
-        this.explosionSound.play('', 0, 0.8, false, true);
-        var explosionAnimation = this.explosions.getFirstExists(false);
-        explosionAnimation.reset(asteroid.x, asteroid.y);
-        explosionAnimation.play('explosion', 100, false, true);
-
-        this.health -= 30;
-
-        if (this.health <=50){
-            this.isBurning = true;
-            this.player.animations.play('burning', 20, true);
-            this.thrust = 0.5;
-            this.maxvelocity = 100;
-            this.turnincrement = 0.02;
-            this.maxturn = 1;
-        }
-
-        if (this.health <= 0){
-            this.explosionSound.play('', 0, 1, false, true);
-            var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
-            bigExplosionAnimation.reset(this.player.x, this.player.y);
-            bigExplosionAnimation.play('big-explosion', 100, false, true);
-            this.gameMusic.stop();
-            this.missiles.setAll('body.velocity.x', 0);
-            this.asteroids.setAll('body.velocity.x', 0);
-            this.asteroidTimer = Number.MAX_VALUE;
-            var deathTween = this.game.add.tween(this.player).to({x: this.game.width/2, y: this.game.height/2}, 1000, Phaser.Easing.Linear.NONE, true);
-            deathTween.onComplete.add(function(){
+        if (this.isAlive){
+            asteroid.kill();
+            this.explosionSound.play('', 0, 0.8, false, true);
+            var explosionAnimation = this.explosions.getFirstExists(false);
+            explosionAnimation.reset(asteroid.x, asteroid.y);
+            explosionAnimation.play('explosion', 100, false, true);
+    
+            this.health -= 30;
+    
+            if (this.health <=50){
+                this.isBurning = true;
+                this.player.animations.play('burning', 20, true);
+                this.thrust = 0.5;
+                this.maxvelocity = 100;
+                this.turnincrement = 0.02;
+                this.maxturn = 1;
+            }
+    
+            if (this.health <= 0){
+                this.isAlive = false;
                 this.explosionSound.play('', 0, 1, false, true);
                 var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
                 bigExplosionAnimation.reset(this.player.x, this.player.y);
                 bigExplosionAnimation.play('big-explosion', 100, false, true);
-                this.player.kill();
-                this.game.world.bounds = new Phaser.Rectangle(0, 0, this.game.width, this.game.height);
-                this.game.camera.setBoundsToWorld();
-                var scoreboard = new Scoreboard(this.game);
-                scoreboard.show(this.score);
-                this.youBlewIt.play('', 0, 1, false, true);
-            }, this);
+                this.gameMusic.stop();
+                this.missiles.setAll('body.velocity.x', 0);
+                this.asteroids.setAll('body.velocity.x', 0);
+                this.asteroidTimer = Number.MAX_VALUE;
+                var deathTween = this.game.add.tween(this.player).to({x: this.game.width/2, y: this.game.height/2}, 1000, Phaser.Easing.Linear.NONE, true);
+                deathTween.onComplete.add(function(){
+                    this.explosionSound.play('', 0, 1, false, true);
+                    var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
+                    bigExplosionAnimation.reset(this.player.x, this.player.y);
+                    bigExplosionAnimation.play('big-explosion', 100, false, true);
+                    this.player.kill();
+                    this.game.world.bounds = new Phaser.Rectangle(0, 0, this.game.width, this.game.height);
+                    this.game.camera.setBoundsToWorld();
+                    var scoreboard = new Scoreboard(this.game);
+                    scoreboard.show(this.score);
+                    this.youBlewIt.play('', 0, 1, false, true);
+                }, this);
+            }
         }
     },
 
@@ -312,5 +318,6 @@ StarPatrol.Game.prototype = {
         this.thrust = 5;
         this.isBurning = false;
         this.asteroidTimer = 0;
+        this.isAlive = true;
     }
 }
