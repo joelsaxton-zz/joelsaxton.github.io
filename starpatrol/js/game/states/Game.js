@@ -86,7 +86,7 @@ StarPatrol.Game.prototype = {
         this.reloadedText = this.game.add.bitmapText(10,70, 'minecraftia', 'Reloaded: ' + this.isReloaded, 20);
         this.reloadedText.tint = 0x66CD00; // '#66CD00'
         this.batteryText.tint = 0xFF0000; // '#FF0000'
-        this.scoreText.fixedToCamera = false;
+        this.scoreText.fixedToCamera = true;
 
 
         this.jetSound = this.game.add.audio('rocket');
