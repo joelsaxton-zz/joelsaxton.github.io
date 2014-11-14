@@ -118,8 +118,8 @@ StarPatrol.Game.prototype = {
 
     update: function() {
 
-        //this.alien1.rotation = game.physics.arcade.angleBetween(this.alien1, this.player);
-        //this.game.physics.arcade.moveToObject(this.alien1, this.player, 400, 5000);
+        this.alien1.rotation = game.physics.arcade.angleBetween(this.alien1, this.player);
+        this.game.physics.arcade.moveToObject(this.alien1, this.player, 400, 5000);
 
         // Camera
         this.background.tilePosition.x = -game.camera.x;
