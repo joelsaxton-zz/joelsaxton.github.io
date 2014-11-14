@@ -17,7 +17,7 @@ StarPatrol.MainMenu.prototype = {
         this.splash = this.add.sprite(this.game.world.centerX, this.game.world.centerY, 'logo');
         this.splash.anchor.setTo(0.5);
 
-        this.startText = this.game.add.bitmapText(0,0, 'minecraftia', 'click to start', 24);
+        this.startText = this.game.add.bitmapText(0,0, 'minecraftia', 'click to start', 16);
         this.startText.x = this.game.width / 2 - this.startText.textWidth / 2;
         this.startText.y = this.game.height / 2 + this.splash.height /2;
     },

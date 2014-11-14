@@ -7,13 +7,11 @@ var Missile = function(game, x, y, angle, key, frame){
     Phaser.Sprite.call(this, game, x, y, key, frame);
 
     this.scale.setTo(0.15);
-    this.anchor.setTo(0);
+    this.anchor.setTo(0.5);
     this.animations.add('missile');
     this.game.physics.arcade.enableBody(this);
     this.body.allowGravity = false;
     this.angle = angle;
-    //this.body.velocity.x = 500 * Math.cos((this.angle + 270) * Math.PI / 180);
-    //this.body.velocity.y = 500 * Math.sin((this.angle + 270) * Math.PI / 180);
 
     this.events.onRevived.add(this.onRevived, this);
 };
