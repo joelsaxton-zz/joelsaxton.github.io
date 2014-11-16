@@ -8,6 +8,7 @@ StarPatrol.Preload = function(){
 StarPatrol.Preload.prototype = {
     preload: function() {
 
+        this.game.stage.backgroundColor = '#000000';
         this.splash = this.add.sprite(this.game.world.centerX, this.game.world.centerY, 'logo');
         this.splash.anchor.setTo(0.5);
 
@@ -23,6 +24,10 @@ StarPatrol.Preload.prototype = {
         this.load.spritesheet('explosion', 'assets/images/explosion-spritesheet.png', 64, 64, 23);
         this.load.spritesheet('big-explosion', 'assets/images/big-explosion-spritesheet.png', 128, 128, 23);
         this.load.spritesheet('alien1', 'assets/images/alien1-spritesheet.png', 277, 160, 1);
+        this.load.spritesheet('earth', 'assets/images/earth.png', 250, 250, 1);
+        this.load.spritesheet('map', 'assets/images/starmap.png', 100, 100, 1);
+        this.load.spritesheet('playermap', 'assets/images/playermap-spritesheet.png', 1, 1, 2);
+        this.load.spritesheet('alienmap', 'assets/images/alienmap-spritesheet.png', 1, 1, 2);
 
         this.load.audio('gameMusic', ['assets/audio/Pamgaea.mp3', 'assets/audio/Pamgaea.ogg']);
         this.load.audio('missile', 'assets/audio/missile.wav');

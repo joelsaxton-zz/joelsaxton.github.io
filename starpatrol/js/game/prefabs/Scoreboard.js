@@ -29,7 +29,7 @@ Scoreboard.prototype.show = function(score){
 
     this.y = this.game.height;
 
-    gameOverText = this.game.add.bitmapText(0,100, 'minecraftia', 'You Died.', 36);
+    gameOverText = this.game.add.bitmapText(0,100, 'minecraftia', 'YOU BLEW IT', 40);
     gameOverText.x = this.game.width/2 - (gameOverText.textWidth /2);
     this.add(gameOverText);
 
@@ -46,7 +46,7 @@ Scoreboard.prototype.show = function(score){
     this.add(startText);
 
     if(isNewHighScore) {
-        newHighScoreText = this.game.add.bitmapText(0,100, 'minecraftia', 'New High Score!', 12);
+        newHighScoreText = this.game.add.bitmapText(0,100, 'minecraftia', 'New High Score!', 16);
         newHighScoreText.tint = 0x4ebef7; // '#4ebef7'
         newHighScoreText.x = gameOverText.x + gameOverText.textWidth + 40;
         newHighScoreText.angle = 45;

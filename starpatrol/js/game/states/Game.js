@@ -6,7 +6,7 @@ StarPatrol.Game = function(){
     this.isReloaded = true;
     this.reloadInterval = 1000;
     this.rechargeInterval = 50;
-    this.asteroidInterval = 500;
+    this.asteroidInterval = 1000;
     this.rechargeTimer = 0;
     this.reloadTimer = 0;
     this.asteroidTimer = 0;
@@ -16,31 +16,61 @@ StarPatrol.Game = function(){
     this.turnRate = 0;
     this.MAXCHARGE = 100;
     this.charge = this.MAXCHARGE;
-    this.maxvelocity = 200;
+    this.maxvelocity = 400;
     this.maxturn = 4;
-    this.thrust = 5;
+    this.thrust = 6;
     this.MISSILE_DAMAGE = 30;
     this.MISSILE_DISCHARGE = 50;
     this.health = 100;
     this.isBurning = false;
-    this.ALIENTURNRATE = 0.2;
+    this.ALIENTURNRATE = 0.1;
+    this.ALIENSPEED = 600;
+    this.TOTALASTEROIDS = 50; // Can't figure out how to use this properly
+    this.asteroidCount = 0;
+    this.GRAVITY = 400;
+    this.GRAVITYRANGE = 4000;
+    this.GAMESIZE = 16000;
+    this.mapSize = 100;
+    this.mapGameRatio = this.mapSize / this.GAMESIZE;
+    this.mapEarthScale = 8;
 };
 
 StarPatrol.Game.prototype = {
     create: function() {
-        //  Resize our game world to be a 8000 x 8000 square
-        this.game.world.setBounds(-4000, -4000, 8000, 8000);
+        //  Resize our game world to this.GAMESIZE in x and y dimensions
+        this.game.world.setBounds(0, 0, this.GAMESIZE, this.GAMESIZE);
         //this.game.onShutDownCallback(this.shutdown);
 
         //  Our tiled scrolling background
         this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
         this.background.fixedToCamera = true;
-        this.player = this.add.sprite(200, this.game.height/2, 'player');
-        this.alien1 = this.add.sprite(200, this.game.height/1.2, 'alien1');
+        this.earth = this.add.sprite(this.world.centerX, this.world.centerY, 'earth');
+        this.player = this.add.sprite(this.world.centerX/2, this.world.centerY/2, 'player');
+        this.alien1 = this.add.sprite(this.world.centerX/2, this.world.centerY, 'alien1');
+        this.map = this.add.sprite(this.game.width - this.mapSize, 0, 'map');
+        this.mapEarth = this.add.sprite(this.game.width - this.mapSize + parseInt(this.earth.x * this.mapGameRatio), parseInt(this.earth.y * this.mapGameRatio), 'earth');
+        this.playerMap = this.add.sprite(this.game.width - this.mapSize + parseInt(this.player.x * this.mapGameRatio), parseInt(this.player.y * this.mapGameRatio), 'playermap');
+        this.alienMap = this.add.sprite(this.game.width - this.mapSize + parseInt(this.alien1.x * this.mapGameRatio), parseInt(this.alien1.y * this.mapGameRatio), 'alienmap');
+
+        this.map.fixedToCamera = true;
+        this.mapEarth.fixedToCamera = true;
+        this.playerMap.fixedToCamera = true;
+        this.alienMap.fixedToCamera = true;
+        this.alienMap.anchor.setTo(0.5);
+        this.alienMap.scale.setTo(4);
+        this.playerMap.anchor.setTo(0.5);
+        this.playerMap.scale.setTo(4);
+        this.earth.anchor.setTo(0.5);
+        this.earth.scale.setTo(1);
+        this.mapEarth.anchor.setTo(0.5);
+        this.mapEarth.scale.setTo(this.mapGameRatio*this.mapEarthScale);
         this.player.anchor.setTo(0.5);
         this.player.scale.setTo(0.5);
         this.alien1.anchor.setTo(0.5);
         this.alien1.scale.setTo(0.5);
+
+        this.game.physics.arcade.enableBody(this.earth);
+        this.earth.body.immovable = true;
 
         this.player.animations.add('drift', [0,0,0,0,0,0,0,4,5,6,7]);
         this.player.animations.add('thrust', [1,2,3,2]);
@@ -48,9 +78,13 @@ StarPatrol.Game.prototype = {
         this.player.animations.play('drift', 20, true);
         this.player.isAlive = true;
 
+        this.playerMap.animations.add('tracking', [0,1]);
+        this.playerMap.animations.play('tracking', 10, true);
+        this.alienMap.animations.play('tracking', 10, true);
+
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.game.physics.arcade.enableBody(this.player);
-        this.player.body.collideWorldBounds = true;
+        this.player.body.collideWorldBounds = false;
         this.player.body.bounce.set(0.5);
         this.player.body.maxVelocity.setTo(this.maxvelocity, this.maxvelocity);
 
@@ -72,7 +106,6 @@ StarPatrol.Game.prototype = {
         this.asteroids = this.game.add.group();
         this.asteroids.setAll('anchor.x', 0.5);
         this.asteroids.setAll('anchor.y', 0.5);
-        this.asteroids.setAll('outOfBoundsKill', true);
         this.asteroids.setAll('checkWorldBounds', true);
 
         //  Explosion pool
@@ -84,9 +117,9 @@ StarPatrol.Game.prototype = {
             explosionAnimation.animations.add('explosion');
         }
 
-        //  Explosion pool
+        //  Big Explosion pool
         this.bigExplosions = game.add.group();
-        for (var i = 0; i < 1; i++)
+        for (var i = 0; i < 5; i++)
         {
             var explosionAnimation = this.bigExplosions.create(0, 0, 'big-explosion', [0], false);
             explosionAnimation.anchor.setTo(0.5, 0.5);
@@ -116,10 +149,56 @@ StarPatrol.Game.prototype = {
 
     },
 
+
+    // Asteroid out of bounds
+    killAsteroid: function(asteroid) {
+        asteroid.kill();
+        console.log("asteroid destroyed");
+        this.asteroidCount--;
+    },
+
     update: function() {
 
+        // Check if sprites crossed world bounds
+        if (this.player.x > this.world.width){
+            this.player.x = 0;
+        }
+        if (this.player.x < 0){
+            this.player.x = this.world.width;
+        }
+        if (this.player.y > this.world.height){
+            this.player.y = 0;
+        }
+        if (this.player.y < 0){
+            this.player.y = this.world.height;
+        }
+
+        // Update positions on Star Map
+        this.playerMap.fixedToCamera = false;
+        this.playerMap.x = this.game.width - this.mapSize + parseInt(this.player.x * this.mapGameRatio);
+        this.playerMap.y = parseInt(this.player.y * this.mapGameRatio);
+        this.playerMap.fixedToCamera = true;
+
+        this.alienMap.fixedToCamera = false;
+        this.alienMap.x = this.game.width - this.mapSize + parseInt(this.alien1.x * this.mapGameRatio);
+        this.alienMap.y = parseInt(this.alien1.y * this.mapGameRatio);
+        this.alienMap.fixedToCamera = true;
+
+
+        // Alien chases ship
         this.alien1.rotation = game.physics.arcade.angleBetween(this.alien1, this.player);
-        this.game.physics.arcade.moveToObject(this.alien1, this.player, 400, 5000);
+        this.game.physics.arcade.moveToObject(this.alien1, this.player, this.ALIENSPEED, 2000);
+
+
+        this.distanceFromEarth = Math.pow(this.earth.body.x/10 - this.player.body.x/10, 2) + Math.pow(this.earth.body.y/10 - this.player.body.y/10, 2)
+        // Gravity
+        if (this.distanceFromEarth < this.GRAVITYRANGE) {
+            this.player.body.allowGravity = true;
+            this.player.body.gravity = new Phaser.Point(this.earth.body.x - this.player.body.x, this.earth.body.y - this.player.body.y);
+            this.player.body.gravity = this.player.body.gravity.normalize().multiply(this.GRAVITY, this.GRAVITY);
+        } else {
+            this.player.body.allowGravity = false;
+        }
 
         // Camera
         this.background.tilePosition.x = -game.camera.x;
@@ -139,6 +218,7 @@ StarPatrol.Game.prototype = {
             this.batteryText.text = 'Charge: ' + this.charge;
         }
 
+        // Create asteroid
         if(this.asteroidTimer < this.game.time.now) {
             this.asteroidTimer = this.game.time.now + this.asteroidInterval;
             this.createAsteroid();
@@ -228,12 +308,14 @@ StarPatrol.Game.prototype = {
             this.player.angle += this.turnRate;
         }
 
-
         // Collisions
         this.game.physics.arcade.collide(this.missiles, this.asteroids, this.missileAsteroidHit, null, this);
         this.game.physics.arcade.collide(this.player, this.asteroids, this.playerAsteroidHit, null, this);
         this.game.physics.arcade.collide(this.player, this.alien1, this.playerAlienHit, null, this);
         this.game.physics.arcade.collide(this.missiles, this.alien1, this.missileAlienHit, null, this);
+        this.game.physics.arcade.collide(this.player, this.earth, this.playerEarthHit, null, this);
+        this.game.physics.arcade.collide(this.missiles, this.earth, this.missileEarthHit, null, this);
+        this.game.physics.arcade.collide(this.asteroids, this.earth, this.asteroidEarthHit, null, this);
 
     },
 
@@ -244,42 +326,68 @@ StarPatrol.Game.prototype = {
         missile.revive();
     },
 
-    createAsteroid: function() {
-        var start = this.game.rnd.integerInRange(1,4);
-        switch(start){
-            case 1:
-                var x = this.game.world.bounds.width;
-                var y = this.game.rnd.integerInRange(0, this.game.world.bounds.height);
-                var direction = 1;
-                break;
-            case 2:
-                var x = this.game.world.bounds.x;
-                var y = this.game.rnd.integerInRange(0, this.game.world.bounds.height);
-                var direction = 2;
-                break;
-            case 3:
-                var x = this.game.rnd.integerInRange(0, this.game.world.bounds.width);
-                var y = this.game.world.bounds.height;
-                var direction = 3;
-                break;
-            case 4:
-                var x = this.game.rnd.integerInRange(0, this.game.world.bounds.width);
-                var y = this.game.world.bounds.y;
-                var direction = 4;
-                break;
-        }
+    createAsteroid: function () {
 
-        var asteroid = this.asteroids.getFirstExists(false);
-        if (!asteroid){
-            asteroid = new Asteroid(this.game, x, y, direction);
-            this.asteroids.add(asteroid);
-        }
+        if (this.asteroidCount < this.TOTALASTEROIDS) {
+            var start = this.game.rnd.integerInRange(1, 4);
+            switch (start) {
+                case 1:
+                    var x = this.game.world.bounds.width;
+                    var y = this.game.rnd.integerInRange(0, this.game.world.bounds.height);
+                    var direction = 1;
+                    break;
+                case 2:
+                    var x = this.game.world.bounds.x;
+                    var y = this.game.rnd.integerInRange(0, this.game.world.bounds.height);
+                    var direction = 2;
+                    break;
+                case 3:
+                    var x = this.game.rnd.integerInRange(0, this.game.world.bounds.width);
+                    var y = this.game.world.bounds.height;
+                    var direction = 3;
+                    break;
+                case 4:
+                    var x = this.game.rnd.integerInRange(0, this.game.world.bounds.width);
+                    var y = this.game.world.bounds.y;
+                    var direction = 4;
+                    break;
+            }
 
-        asteroid.reset(x, y);
-        asteroid.revive();
+            var asteroid = this.asteroids.getFirstDead();
+            if (!asteroid) {
+                asteroid = new Asteroid(this.game, x, y, direction);
+                asteroid.events.onOutOfBounds.add(this.killAsteroid, asteroid);
+                this.asteroids.add(asteroid);
+            }
+
+            asteroid.reset(x, y);
+            asteroid.revive();
+            this.asteroidCount++;
+        }
     },
 
-    missileAsteroidHit: function(missile, asteroid) {
+    playerEarthHit: function () {
+        this.explosionSound.play('', 0, 0.2, false, true);
+        this.killPlayer();
+    },
+
+    missileEarthHit: function (earth, missile) {
+        this.explosionSound.play('', 0, 0.2, false, true);
+        var explosionAnimation = this.explosions.getFirstExists(false);
+        explosionAnimation.reset(missile.x, missile.y);
+        explosionAnimation.play('explosion', 100, false, true);
+        missile.destroy();
+    },
+
+    asteroidEarthHit: function (earth, asteroid) {
+        this.explosionSound.play('', 0, 0.2, false, true);
+        var explosionAnimation = this.explosions.getFirstExists(false);
+        explosionAnimation.reset(asteroid.x, asteroid.y);
+        explosionAnimation.play('explosion', 100, false, true);
+        asteroid.kill();
+    },
+
+    missileAsteroidHit: function(asteroid, missile) {
         setTimeout(function(){
             missile.destroy();
             asteroid.kill();
@@ -292,25 +400,34 @@ StarPatrol.Game.prototype = {
         this.scoreText.text = 'Score: ' + this.score;
     },
 
-    missileAlienHit: function(missile, alien) {
-        setTimeout(function(){
-            missile.destroy();
-        }, 100);
+    missileAlienHit: function(alien, missile) {
         this.explosionSound.play('', 0, 0.8, false, true);
         var explosionAnimation = this.explosions.getFirstExists(false);
         explosionAnimation.reset(missile.x, missile.y);
+        missile.destroy();
         explosionAnimation.play('explosion', 100, false, true);
-        this.score += 200;
-        this.scoreText.text = 'Score: ' + this.score;
         this.alien1.health -=20;
 
         if (this.alien1.health <= 0){
-            console.log('dead');
+            this.score += 200;
+            this.scoreText.text = 'Score: ' + this.score;
+            this.alien1.body.angularVelocity = 50;
             this.explosionSound.play('', 0, 1, false, true);
             var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
             bigExplosionAnimation.reset(this.alien1.x, this.alien1.y);
-            bigExplosionAnimation.play('big-explosion', 100, false, true);
-            this.alien1.kill();
+            bigExplosionAnimation.play('big-explosion', 500, false, true);
+            var deathTween = this.game.add.tween(this.alien1.scale).to({
+                x: 1.1,
+                y: 1.1
+            }, 50, Phaser.Easing.Linear.NONE, true, 0, 1, true);
+            deathTween.onComplete.add(function () {
+                this.explosionSound.play('', 0, 1, false, true);
+                var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
+                bigExplosionAnimation.reset(this.alien1.x, this.alien1.y);
+                bigExplosionAnimation.play('big-explosion', 500, false, true);
+                this.alien1.kill();
+                this.alienMap.kill();
+            }, this);
         }
     },
 
@@ -341,33 +458,17 @@ StarPatrol.Game.prototype = {
                 var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
                 bigExplosionAnimation.reset(this.player.x, this.player.y);
                 bigExplosionAnimation.play('big-explosion', 100, false, true);
-                this.gameMusic.stop();
                 this.missiles.setAll('body.velocity.x', 0);
                 this.missiles.setAll('body.velocity.y', 0);
                 this.asteroids.setAll('body.velocity.x', 0);
                 this.asteroids.setAll('body.velocity.y', 0);
                 this.asteroidTimer = Number.MAX_VALUE;
-                var deathTween = this.game.add.tween(this.player).to({
-                    x: this.game.width / 2,
-                    y: this.game.height / 2
-                }, 1000, Phaser.Easing.Linear.NONE, true);
-                deathTween.onComplete.add(function () {
-                    this.explosionSound.play('', 0, 1, false, true);
-                    var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
-                    bigExplosionAnimation.reset(this.player.x, this.player.y);
-                    bigExplosionAnimation.play('big-explosion', 100, false, true);
-                    this.player.kill();
-                    this.game.world.bounds = new Phaser.Rectangle(0, 0, this.game.width, this.game.height);
-                    this.game.camera.setBoundsToWorld();
-                    var scoreboard = new Scoreboard(this.game);
-                    scoreboard.show(this.score);
-                    this.youBlewIt.play('', 0, 1, false, true);
-                }, this);
+                this.killPlayer();
             }
         }
     },
 
-    playerAlienHit: function(player, alien) {
+    playerAlienHit: function() {
         if (this.player.isAlive) {
             this.explosionSound.play('', 0, 0.8, false, true);
             var explosionAnimation = this.explosions.getFirstExists(false);
@@ -379,31 +480,37 @@ StarPatrol.Game.prototype = {
             this.explosionSound.play('', 0, 1, false, true);
             var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
             bigExplosionAnimation.reset(this.player.x, this.player.y);
-            bigExplosionAnimation.play('big-explosion', 100, false, true);
-            this.gameMusic.stop();
+            bigExplosionAnimation.play('big-explosion', 40, false, true);
             this.missiles.setAll('body.velocity.x', 0);
             this.missiles.setAll('body.velocity.y', 0);
             this.asteroids.setAll('body.velocity.x', 0);
             this.asteroids.setAll('body.velocity.y', 0);
             this.asteroidTimer = Number.MAX_VALUE;
-            var deathTween = this.game.add.tween(this.player).to({
-                x: this.game.width / 2,
-                y: this.game.height / 2
-            }, 1000, Phaser.Easing.Linear.NONE, true);
-            deathTween.onComplete.add(function () {
-                this.explosionSound.play('', 0, 1, false, true);
-                var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
-                bigExplosionAnimation.reset(this.player.x, this.player.y);
-                bigExplosionAnimation.play('big-explosion', 100, false, true);
-                this.player.kill();
+            this.killPlayer();
+        }
+
+    },
+
+    killPlayer: function(){
+        this.gameMusic.stop();
+        var deathTween = this.game.add.tween(this.player.scale).to({
+            x: 0.55,
+            y: 0.55
+        }, 50, Phaser.Easing.Linear.None, true, 0, 6, true);
+        deathTween.onComplete.add(function () {
+            this.explosionSound.play('', 0, 1, false, true);
+            var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
+            bigExplosionAnimation.reset(this.player.x, this.player.y);
+            this.player.kill();
+            this.youBlewIt.play('', 0, 0.8, false, true);
+            bigExplosionAnimation.play('big-explosion', 20, false, true).onComplete.add(function(){
                 this.game.world.bounds = new Phaser.Rectangle(0, 0, this.game.width, this.game.height);
                 this.game.camera.setBoundsToWorld();
                 var scoreboard = new Scoreboard(this.game);
                 scoreboard.show(this.score);
-                this.youBlewIt.play('', 0, 1, false, true);
             }, this);
-        }
 
+        }, this);
     },
 
     shutdown: function() {
@@ -414,9 +521,9 @@ StarPatrol.Game.prototype = {
             this.score = 0;
             this.health = 100;
             this.turnincrement = 0.1;
-            this.maxvelocity = 200;
+            this.maxvelocity = 400;
             this.maxturn = 4;
-            this.thrust = 5;
+            this.thrust = 6;
             this.isBurning = false;
             this.asteroidTimer = 0;
     }
