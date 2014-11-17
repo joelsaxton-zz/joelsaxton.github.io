@@ -486,6 +486,7 @@ StarPatrol.Game.prototype = {
 
     playerEarthHit: function () {
         this.explosionSound.play('', 0, 0.2, false, true);
+        this.player.health--;
     },
 
     missileEarthHit: function (earth, missile) {
