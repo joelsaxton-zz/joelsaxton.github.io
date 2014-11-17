@@ -22,7 +22,7 @@ Asteroid.prototype.onRevived = function() {
     switch (this.direction) {
         case 1:
             this.body.velocity.x = this.game.rnd.integerInRange(-this.maxUpperVel,-this.maxLowerVel);
-            this.body.velocity.y = this.game.rnd.integerInRange(-100,100);
+            this.body.velocity.y = this.game.rnd.integerInRange(-this.maxLowerVel,this.maxLowerVel);
             break;
         case 2:
             this.body.velocity.x = this.game.rnd.integerInRange(this.maxLowerVel, this.maxUpperVel);

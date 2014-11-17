@@ -28,9 +28,12 @@ StarPatrol.Preload.prototype = {
         this.load.spritesheet('map', 'assets/images/starmap.png', 100, 100, 1);
         this.load.spritesheet('playermap', 'assets/images/playermap-spritesheet.png', 1, 1, 2);
         this.load.spritesheet('alienmap', 'assets/images/alienmap-spritesheet.png', 1, 1, 2);
+        this.load.spritesheet('bullet', 'assets/images/bullet-spritesheet.png', 100, 100, 4);
+
 
         this.load.audio('gameMusic', ['assets/audio/Pamgaea.mp3', 'assets/audio/Pamgaea.ogg']);
         this.load.audio('missile', 'assets/audio/missile.wav');
+        this.load.audio('bullet', 'assets/audio/blip.wav');
         this.load.audio('rocket', 'assets/audio/rocket.wav');
         this.load.audio('explosion', 'assets/audio/explosion.wav');
         this.load.audio('youblewit', 'assets/audio/youblewit.wav');

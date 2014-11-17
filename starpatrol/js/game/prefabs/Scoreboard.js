@@ -9,7 +9,7 @@ Scoreboard.prototype = Object.create(Phaser.Group.prototype);
 Scoreboard.prototype.constructor = Scoreboard;
 
 Scoreboard.prototype.show = function(score){
-    var bmd, background, gameOverText, scoreText, highScoreText, newHighScoreText, startText;
+    var bmd, background, gameOverText, scoreText, highScoreText, newHighScoreText, startText, gameOverMessage;
     bmd = this.game.add.bitmapData(this.game.width, this.game.height);
     bmd.ctx.fillStyle = '#000';
     bmd.ctx.fillRect(0,0, this.game.width, this.game.height);
@@ -33,11 +33,15 @@ Scoreboard.prototype.show = function(score){
     gameOverText.x = this.game.width/2 - (gameOverText.textWidth /2);
     this.add(gameOverText);
 
-    scoreText = this.game.add.bitmapText(0,200, 'minecraftia', 'Your Score: ' + score, 24);
+    gameOverMessage = this.game.add.bitmapText(0,200, 'minecraftia', 'Earth has been destroyed by aliens', 32);
+    gameOverMessage.x = this.game.width/2 - (gameOverMessage.textWidth /2);
+    this.add(gameOverMessage);
+
+    scoreText = this.game.add.bitmapText(0,300, 'minecraftia', 'Your Score: ' + score, 24);
     scoreText.x = this.game.width/2 - (scoreText.textWidth /2);
     this.add(scoreText);
 
-    highScoreText = this.game.add.bitmapText(0,300, 'minecraftia', 'Your High Score: ' + highScore, 24);
+    highScoreText = this.game.add.bitmapText(0,350, 'minecraftia', 'Your High Score: ' + highScore, 24);
     highScoreText.x = this.game.width/2 - (highScoreText.textWidth /2);
     this.add(highScoreText);
 
