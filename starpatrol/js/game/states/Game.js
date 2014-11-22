@@ -663,6 +663,7 @@ StarPatrol.Game.prototype = {
     },
 
     killAlien: function() {
+        this.alien.alive = false;
         this.score += 500;
         this.scoreText.text = 'Score: ' + this.score;
         this.alien.body.angularVelocity = 50;
