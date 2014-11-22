@@ -23,7 +23,7 @@ StarPatrol.Preload.prototype = {
         this.load.spritesheet('asteroid', 'assets/images/asteroid-spritesheet.png', 140, 140, 1);
         this.load.spritesheet('explosion', 'assets/images/explosion-spritesheet.png', 64, 64, 23);
         this.load.spritesheet('big-explosion', 'assets/images/big-explosion-spritesheet.png', 128, 128, 23);
-        this.load.spritesheet('alien1', 'assets/images/alien1-spritesheet.png', 277, 160, 1);
+        this.load.spritesheet('alien', 'assets/images/alien1-spritesheet.png', 277, 160, 1);
         this.load.spritesheet('earth', 'assets/images/earth.png', 250, 250, 1);
         this.load.spritesheet('map', 'assets/images/starmap.png', 100, 100, 1);
         this.load.spritesheet('playermap', 'assets/images/playermap-spritesheet.png', 1, 1, 2);

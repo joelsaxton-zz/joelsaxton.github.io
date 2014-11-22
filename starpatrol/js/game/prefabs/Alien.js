@@ -1,0 +1,31 @@
+/**
+ * Created by joelsaxton on 11/10/14.
+ */
+
+var Alien = function(game, x, y, charge, health, scale, key, frame){
+    key = 'alien';
+    Phaser.Sprite.call(this, game, x, y, key, frame);
+
+    // From game.js
+    this.anchor.setTo(0.5);
+    this.scale.setTo(scale);
+    this.maxcharge = charge;
+    this.maxhealth = health;
+    this.charge = this.maxcharge;
+    this.health = this.maxhealth;
+    this.alive = true;
+    game.physics.arcade.enableBody(this);
+    this.body.collideWorldBounds = false;
+    this.body.bounce.set(1);
+    this.events.onRevived.add(this.onRevived, this);
+
+};
+
+Alien.prototype = Object.create(Phaser.Sprite.prototype);
+Alien.prototype.constructor = Alien;
+
+Alien.prototype.onRevived = function() {
+    this.charge = this.maxcharge;
+    this.health = this.maxhealth;
+    this.alive = true;
+};
