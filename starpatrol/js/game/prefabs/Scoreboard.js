@@ -8,8 +8,8 @@ var Scoreboard = function(game){
 Scoreboard.prototype = Object.create(Phaser.Group.prototype);
 Scoreboard.prototype.constructor = Scoreboard;
 
-Scoreboard.prototype.show = function(score){
-    var bmd, background, gameOverText, scoreText, highScoreText, newHighScoreText, startText, gameOverMessage;
+Scoreboard.prototype.show = function(score, gameOverSound, explosionSound){
+    var bmd, background, gameOverText, scoreText, highScoreText, newHighScoreText, startText;
     bmd = this.game.add.bitmapData(this.game.width, this.game.height);
     bmd.ctx.fillStyle = '#000';
     bmd.ctx.fillRect(0,0, this.game.width, this.game.height);
@@ -29,37 +29,35 @@ Scoreboard.prototype.show = function(score){
 
     this.y = this.game.height;
 
-    gameOverText = this.game.add.bitmapText(0,100, 'minecraftia', 'YOU BLEW IT', 40);
-    gameOverText.x = this.game.width/2 - (gameOverText.textWidth /2);
-    this.add(gameOverText);
-
-    gameOverMessage = this.game.add.bitmapText(0,200, 'minecraftia', 'Earth has been destroyed by aliens', 32);
-    gameOverMessage.x = this.game.width/2 - (gameOverMessage.textWidth /2);
-    this.add(gameOverMessage);
-
-    scoreText = this.game.add.bitmapText(0,300, 'minecraftia', 'Your Score: ' + score, 24);
+    scoreText = this.game.add.bitmapText(0, this.game.world.centerY, 'minecraftia', 'Your Score: ' + score, 16);
     scoreText.x = this.game.width/2 - (scoreText.textWidth /2);
     this.add(scoreText);
 
-    highScoreText = this.game.add.bitmapText(0,350, 'minecraftia', 'Your High Score: ' + highScore, 24);
+    highScoreText = this.game.add.bitmapText(0, this.game.world.centerY + 50, 'minecraftia', 'Your High Score: ' + highScore, 16);
     highScoreText.x = this.game.width/2 - (highScoreText.textWidth /2);
     this.add(highScoreText);
 
-    startText = this.game.add.bitmapText(0,400, 'minecraftia', 'Tap to play again!', 16);
+    startText = this.game.add.bitmapText(0, this.game.world.centerY + 100, 'minecraftia', 'Click to play again!', 14);
     startText.x = this.game.width/2 - (startText.textWidth /2);
     this.add(startText);
 
     if(isNewHighScore) {
         newHighScoreText = this.game.add.bitmapText(0,100, 'minecraftia', 'New High Score!', 16);
         newHighScoreText.tint = 0x4ebef7; // '#4ebef7'
-        newHighScoreText.x = gameOverText.x + gameOverText.textWidth + 40;
+        newHighScoreText.x = scoreText.x + scoreText.textWidth + 40;
         newHighScoreText.angle = 45;
         this.add(newHighScoreText);
     }
 
-    this.game.add.tween(this).to({y:0}, 1000, Phaser.Easing.Bounce.Out, true);
-    this.game.input.onDown.addOnce(this.restart, this);
+    explosionSound.play('', 0, 0.5, false, true);
 
+    this.game.add.tween(this).to({y:0}, 500, Phaser.Easing.Bounce.Out, true).onComplete.add(function(){
+        this.fail = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY - 100, 'scoreboard-fail');
+        this.fail.anchor.setTo(0.5);
+        gameOverSound.play('', 0, 0.5, false, true);
+    }, this);
+
+    this.game.input.onDown.addOnce(this.restart, this);
 };
 
 Scoreboard.prototype.restart = function(){

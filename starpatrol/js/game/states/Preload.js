@@ -18,6 +18,7 @@ StarPatrol.Preload.prototype = {
         this.load.setPreloadSprite(this.preloadBar);
 
         this.load.image('background', 'assets/images/tiles/star-background.png');
+        this.load.image('scoreboard-fail', 'assets/images/scoreboard-fail.png');
         this.load.spritesheet('missile', 'assets/images/missile-spritesheet.png', 100, 400, 4);
         this.load.spritesheet('player', 'assets/images/ship-spritesheet.png', 100, 300, 16);
         this.load.spritesheet('asteroid', 'assets/images/asteroid-spritesheet.png', 140, 140, 1);
@@ -25,7 +26,14 @@ StarPatrol.Preload.prototype = {
         this.load.spritesheet('big-explosion', 'assets/images/big-explosion-spritesheet.png', 128, 128, 23);
         this.load.spritesheet('alien', 'assets/images/alien1-spritesheet.png', 277, 160, 1);
         this.load.spritesheet('earth', 'assets/images/earth.png', 250, 250, 1);
-        this.load.spritesheet('map', 'assets/images/starmap.png', 100, 100, 1);
+        this.load.spritesheet('pluto', 'assets/images/pluto.png', 200, 200, 1);
+        this.load.spritesheet('neptune', 'assets/images/neptune.png', 300, 300, 1);
+        this.load.spritesheet('uranus', 'assets/images/uranus.png', 300, 300, 1);
+        this.load.spritesheet('saturn', 'assets/images/saturn.png', 300, 676, 1);
+        this.load.spritesheet('jupiter', 'assets/images/jupiter.png', 350, 350, 1);
+        this.load.spritesheet('mars', 'assets/images/mars.png', 200, 200, 1);
+
+        this.load.spritesheet('map', 'assets/images/starmap.png', 800, 100, 1);
         this.load.spritesheet('playermap', 'assets/images/playermap-spritesheet.png', 1, 1, 2);
         this.load.spritesheet('alienmap', 'assets/images/alienmap-spritesheet.png', 1, 1, 2);
         this.load.spritesheet('bullet', 'assets/images/bullet-spritesheet.png', 100, 100, 4);
@@ -37,6 +45,11 @@ StarPatrol.Preload.prototype = {
         this.load.audio('rocket', 'assets/audio/rocket.wav');
         this.load.audio('explosion', 'assets/audio/explosion.wav');
         this.load.audio('youblewit', 'assets/audio/youblewit.wav');
+        this.load.audio('warp-start', 'assets/audio/warp-start.wav');
+        this.load.audio('warp', 'assets/audio/warp.wav');
+        this.load.audio('warp-on', 'assets/audio/warp-on.wav');
+        this.load.audio('warp-down', 'assets/audio/warp-down.wav');
+
 
         this.load.bitmapFont('minecraftia', 'assets/fonts/minecraftia/minecraftia.png', 'assets/fonts/minecraftia/minecraftia.xml');
 

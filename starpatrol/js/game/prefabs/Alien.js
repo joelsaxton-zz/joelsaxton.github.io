@@ -6,7 +6,7 @@ var Alien = function(game, x, y, charge, health, scale, key, frame){
     key = 'alien';
     Phaser.Sprite.call(this, game, x, y, key, frame);
 
-    // From game.js
+    this.id = game.rnd.uuid();
     this.anchor.setTo(0.5);
     this.scale.setTo(scale);
     this.maxcharge = charge;
@@ -15,8 +15,9 @@ var Alien = function(game, x, y, charge, health, scale, key, frame){
     this.health = this.maxhealth;
     this.alive = true;
     game.physics.arcade.enableBody(this);
-    this.body.collideWorldBounds = false;
-    this.body.bounce.set(1);
+    this.checkWorldBounds = true;
+    this.body.collideWorldBounds = true;
+    this.body.bounce.set(0.4);
     this.events.onRevived.add(this.onRevived, this);
 
 };
