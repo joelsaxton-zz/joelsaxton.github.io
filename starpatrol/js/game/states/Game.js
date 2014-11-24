@@ -243,7 +243,7 @@ StarPatrol.Game.prototype = {
 
         //  Create small explosion pool
         this.explosions = game.add.group();
-        for (var i = 0; i < 20; i++)
+        for (var i = 0; i < 30; i++)
         {
             var explosionAnimation = this.explosions.create(0, 0, 'explosion', [0], false);
             explosionAnimation.anchor.setTo(0.5, 0.5);
@@ -814,27 +814,19 @@ StarPatrol.Game.prototype = {
         }
         this.player.isAlive = false;
         this.gameMusic.stop();
-        this.map.kill();
-        var deathTween = this.game.add.tween(this.player.scale).to({
-            x: 1.1 * this.player.scale,
-            y: 1.1 * this.player.scale
-        }, 5, Phaser.Easing.Linear.None, true, 0, 4, true);
-        deathTween.onComplete.add(function () {
-            this.explosionSound.play('', 0, 1, false, true);
-            var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
-            bigExplosionAnimation.reset(this.player.x, this.player.y);
-            this.player.kill();
-            this.healthText.text = 'Hull: DESTROYED';
-            this.batteryText.text = '';
-            this.reloadedText.text = '';
-            this.warpText.text = '';
-            bigExplosionAnimation.play('big-explosion', 20, false, true).onComplete.add(function(){
-                this.game.world.bounds = new Phaser.Rectangle(0, 0, this.game.width, this.game.height);
-                this.game.camera.setBoundsToWorld();
-                var scoreboard = new Scoreboard(this.game);
-                scoreboard.show(this.score, this.youBlewIt, this.explosionSound);
-            }, this);
-
+        this.explosionSound.play('', 0, 1, false, true);
+        var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
+        bigExplosionAnimation.reset(this.player.x, this.player.y);
+        this.player.kill();
+        this.healthText.text = 'Hull: DESTROYED';
+        this.batteryText.text = '';
+        this.reloadedText.text = '';
+        this.warpText.text = '';
+        bigExplosionAnimation.play('big-explosion', 20, false, true).onComplete.add(function () {
+            this.game.world.bounds = new Phaser.Rectangle(0, 0, this.game.width, this.game.height);
+            this.game.camera.setBoundsToWorld();
+            var scoreboard = new Scoreboard(this.game);
+            scoreboard.show(this.score, this.youBlewIt, this.explosionSound);
         }, this);
     },
 
