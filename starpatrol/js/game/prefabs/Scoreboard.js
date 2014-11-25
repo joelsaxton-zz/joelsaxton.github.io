@@ -8,8 +8,8 @@ var Scoreboard = function(game){
 Scoreboard.prototype = Object.create(Phaser.Group.prototype);
 Scoreboard.prototype.constructor = Scoreboard;
 
-Scoreboard.prototype.show = function(score, gameOverSound, explosionSound){
-    var bmd, background, gameOverText, scoreText, highScoreText, newHighScoreText, startText;
+Scoreboard.prototype.show = function(score, gameOverSound, explosionSound, victory){
+    var bmd, background, scoreText, highScoreText, newHighScoreText, startText;
     bmd = this.game.add.bitmapData(this.game.width, this.game.height);
     bmd.ctx.fillStyle = '#000';
     bmd.ctx.fillRect(0,0, this.game.width, this.game.height);
@@ -51,11 +51,19 @@ Scoreboard.prototype.show = function(score, gameOverSound, explosionSound){
 
     explosionSound.play('', 0, 0.5, false, true);
 
-    this.game.add.tween(this).to({y:0}, 500, Phaser.Easing.Bounce.Out, true).onComplete.add(function(){
-        this.fail = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY - 100, 'scoreboard-fail');
-        this.fail.anchor.setTo(0.5);
-        gameOverSound.play('', 0, 0.5, false, true);
-    }, this);
+    if (victory){
+        this.game.add.tween(this).to({y:0}, 500, Phaser.Easing.Bounce.Out, true).onComplete.add(function(){
+            this.win = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY - 100, 'scoreboard-win');
+            this.win.anchor.setTo(0.5);
+            gameOverSound.play('', 0, 0.5, false, true);
+        }, this);
+    } else {
+        this.game.add.tween(this).to({y:0}, 500, Phaser.Easing.Bounce.Out, true).onComplete.add(function(){
+            this.fail = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY - 100, 'scoreboard-fail');
+            this.fail.anchor.setTo(0.5);
+            gameOverSound.play('', 0, 0.5, false, true);
+        }, this);
+    }
 
     this.game.input.onDown.addOnce(this.restart, this);
 };

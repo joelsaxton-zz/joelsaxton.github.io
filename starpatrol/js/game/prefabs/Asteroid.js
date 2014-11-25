@@ -8,6 +8,7 @@ var Asteroid = function(game, asteroidScale, asteroidSpeed, x, y, direction, key
     this.scale.setTo(this.game.rnd.realInRange(0.1,0.5) * asteroidScale);
     this.anchor.setTo(0.5);
     this.game.physics.arcade.enableBody(this);
+    this.body.bounce.set(1.0);
     this.direction = direction;
     this.events.onRevived.add(this.onRevived, this);
     this.maxUpperVel = 400 * asteroidSpeed;
