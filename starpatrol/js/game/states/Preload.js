@@ -35,9 +35,9 @@ StarPatrol.Preload.prototype = {
         this.load.spritesheet('saturn', 'assets/images/saturn.png', 300, 676, 1);
         this.load.spritesheet('jupiter', 'assets/images/jupiter.png', 350, 350, 1);
         this.load.spritesheet('mars', 'assets/images/mars.png', 200, 200, 1);
-        this.load.spritesheet('sun', 'assets/images/sun.png', 400, 800, 1);
+        this.load.spritesheet('sun', 'assets/images/sun.png', 800, 800, 1);
 
-        this.load.spritesheet('map', 'assets/images/starmap.png', 1000, 100, 1);
+        this.load.spritesheet('map', 'assets/images/starmap.png', 200, 200, 1);
         this.load.spritesheet('playermap', 'assets/images/playermap-spritesheet.png', 1, 1, 2);
         this.load.spritesheet('alienmap', 'assets/images/alienmap-spritesheet.png', 1, 1, 2);
         this.load.spritesheet('bullet', 'assets/images/bullet-spritesheet.png', 100, 100, 4);
