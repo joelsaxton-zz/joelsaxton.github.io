@@ -29,7 +29,7 @@ StarPatrol.Game = function(){
     this.MAXBULLETSPEED = this.GAME_SCALE * 4000;
     this.MAXBULLETDISTANCE = this.GAME_SCALE * 1600;
     this.MAXTRACTORBEAMDISTANCE = this.GAME_SCALE * 3200;
-    this.TRACTORBEAMFORCE = this.GAME_SCALE * 1600;
+    this.TRACTORBEAMFORCE = this.GAME_SCALE * 2000;
     this.MINSAFEWARPDISTANCE = this.GAME_SCALE * 2000;
 
     // Timers
@@ -198,7 +198,7 @@ StarPatrol.Game.prototype = {
         // Train parameters
         this.train = this.add.sprite(0, this.world.centerY, 'train');
         this.train.anchor.setTo(0, 0.5);
-        this.train.scale.setTo(this.playerScale * 4);
+        this.train.scale.setTo(this.playerScale * 3);
         this.game.physics.arcade.enableBody(this.train);
         this.train.health = this.MAXHEALTH;
         this.train.map = this.add.sprite(this.game.width - this.mapSize - this.mapOffset + parseInt(this.train.x * this.mapGameRatio), parseInt(this.train.y * this.mapGameRatio) + this.mapOffset, 'trainmap');
@@ -336,7 +336,6 @@ StarPatrol.Game.prototype = {
             this.updatePlanetPositions();
             this.updateTrainPosition();
             this.updateMapPositions();
-            this.train.bringToTop();
             this.alien.bringToTop();
             this.player.bringToTop();
             this.checkWin();
