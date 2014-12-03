@@ -42,7 +42,7 @@ StarPatrol.Preload.prototype = {
         this.load.spritesheet('alienmap', 'assets/images/alienmap-spritesheet.png', 1, 1, 2);
         this.load.spritesheet('trainmap', 'assets/images/trainmap-spritesheet.png', 1, 1, 2);
         this.load.spritesheet('bullet', 'assets/images/bullet-spritesheet.png', 100, 100, 4);
-        this.load.spritesheet('train', 'assets/images/spacetrain.png', 3400, 38, 1);
+        this.load.spritesheet('train', 'assets/images/spacetrain.png', 3825, 105, 1);
 
 
         this.load.audio('gameMusic', ['assets/audio/Pamgaea.mp3', 'assets/audio/Pamgaea.ogg']);

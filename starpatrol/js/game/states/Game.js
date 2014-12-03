@@ -5,12 +5,12 @@ StarPatrol.Game = function(){
 
     // Scaled physics and values based on this.GAME_SCALE
     this.GAME_SCALE = 0.2;
-    this.GAMESIZE = this.GAME_SCALE * 1000000;
-    this.MAXVELOCITY = this.GAME_SCALE * 2000;
-    this.WARPVELOCITY = this.MAXVELOCITY * 8;
-    this.MAXTHRUST = this.GAME_SCALE * 24;
+    this.GAMESIZE = this.GAME_SCALE * 600000;
+    this.MAXVELOCITY = this.GAME_SCALE * 2400;
+    this.WARPVELOCITY = this.MAXVELOCITY * 6;
+    this.MAXTHRUST = this.GAME_SCALE * 30;
     this.ALIENSPEED = this.GAME_SCALE * 1400;
-    this.TRAINSPEED = this.ALIENSPEED * 0.9;
+    this.TRAINSPEED = this.ALIENSPEED * 0.8;
     this.GRAVITY = this.GAME_SCALE * 400;
     this.GRAVITYRANGE = this.GAME_SCALE * 4000;
     this.MISSILESPEED = this.GAME_SCALE * 2000;
@@ -21,16 +21,16 @@ StarPatrol.Game = function(){
     this.ASTEROIDSPEED = this.GAME_SCALE * 2;
     this.playerScale = this.GAME_SCALE;
     this.alienScale = this.GAME_SCALE;
-    this.planetScale = this.GAME_SCALE * 8;
+    this.planetScale = this.GAME_SCALE * 12;
     this.earthRadius = this.planetScale * 125 * 0.5;
-    this.mapPlanetScale = this.GAME_SCALE * 100;
+    this.mapPlanetScale = this.GAME_SCALE * 50;
     this.BULLETLOCKDISTANCE = this.GAME_SCALE * 1200;
     this.BULLETACCELERATION = this.GAME_SCALE * 1200;
     this.MAXBULLETSPEED = this.GAME_SCALE * 4000;
     this.MAXBULLETDISTANCE = this.GAME_SCALE * 1600;
     this.MAXTRACTORBEAMDISTANCE = this.GAME_SCALE * 3200;
-    this.TRACTORBEAMFORCE = this.GAME_SCALE * 2000;
-    this.MINSAFEWARPDISTANCE = this.GAME_SCALE * 2000;
+    this.TRACTORBEAMFORCE = this.GAME_SCALE * 2400;
+    this.MINSAFEWARPDISTANCE = this.GAME_SCALE * 3200;
 
     // Timers
     this.reloadInterval = 2000;
@@ -39,21 +39,21 @@ StarPatrol.Game = function(){
     this.rechargeTimer = 0;
     this.reloadTimer = 0;
     this.warpTimer = 0;
-    this.alienInterval = 30000;
+    this.alienInterval = 24000;
     this.alienTimer = 0;
 
     // Scalars
     this.MAXHEALTH = 100;
     this.MAXCHARGE = 100;
     this.warpDrive = this.MAXCHARGE;
-    this.warpModifier = 16;
+    this.warpModifier = 5;
     this.MISSILE_DAMAGE = 34;
-    this.BULLET_DAMAGE = 15;
+    this.BULLET_DAMAGE = 10;
     this.ASTEROID_DAMAGE = 5;
     this.MISSILE_DISCHARGE = 50;
-    this.SHIELD_DISCHARGE = 2;
+    this.SHIELD_DISCHARGE = 4;
     this.BULLET_DISCHARGE = 100;
-    this.WARP_DISCHARGE = 0.1;
+    this.WARP_DISCHARGE = 0.2;
     this.KILL_ALIEN_SCORE = 500;
     this.DESTROY_ASTEROID_SCORE = 50;
     this.DISTRESS_HEALTH = 20;
@@ -64,11 +64,11 @@ StarPatrol.Game = function(){
     this.mapSize = 200;
     this.mapOffset = 4;
     this.mapGameRatio = this.mapSize / this.GAMESIZE;
-    this.asteroidDensity = 1;
+    this.asteroidDensity = 2;
     this.TOTALASTEROIDS = parseInt(this.GAMESIZE/2000) * this.asteroidDensity;
     this.TOTALALIENS = 1; // How many appear at any one time
     this.aliensKilled = 0;
-    this.orbitSpeedModifier = 3;
+    this.orbitSpeedModifier = 2;
 };
 
 StarPatrol.Game.prototype = {
@@ -165,7 +165,6 @@ StarPatrol.Game.prototype = {
         this.sun.map.anchor.setTo(0.5);
         this.sun.map.scale.setTo(this.mapGameRatio*this.mapPlanetScale * 0.5); // Make sun slightly smaller on map
         this.sun.map.x += this.sun.map.width * 0.5;
-        //this.sun.map.y -= this.sun.map.height;
         this.sun.map.fixedToCamera = true;
 
         // Player parameters
@@ -198,7 +197,7 @@ StarPatrol.Game.prototype = {
         // Train parameters
         this.train = this.add.sprite(0, this.world.centerY, 'train');
         this.train.anchor.setTo(0, 0.5);
-        this.train.scale.setTo(this.playerScale * 3);
+        this.train.scale.setTo(this.playerScale * 6);
         this.game.physics.arcade.enableBody(this.train);
         this.train.health = this.MAXHEALTH;
         this.train.map = this.add.sprite(this.game.width - this.mapSize - this.mapOffset + parseInt(this.train.x * this.mapGameRatio), parseInt(this.train.y * this.mapGameRatio) + this.mapOffset, 'trainmap');
@@ -383,7 +382,7 @@ StarPatrol.Game.prototype = {
         var earth_y = this.earth.y + this.earthRadius;
         this.distanceFromEarth = Math.sqrt(Math.pow(earth_x - this.train.x, 2) + Math.pow(earth_y - this.train.y, 2));
 
-        if (this.distanceFromEarth < this.GRAVITYRANGE * 10) {
+        if (this.distanceFromEarth < this.GRAVITYRANGE * 4) {
             this.gameMusic.stop();
             this.warpLoopSound.stop();
             this.player.isAlive = false;
@@ -769,8 +768,6 @@ StarPatrol.Game.prototype = {
         this.game.physics.arcade.collide(this.player, this.asteroids, this.playerAsteroidHit, null, this);
         this.game.physics.arcade.collide(this.player, this.alien, this.playerAlienHit, null, this);
         this.game.physics.arcade.collide(this.missiles, this.alien, this.missileAlienHit, null, this);
-        //this.game.physics.arcade.collide(this.player, this.planets, this.playerPlanetHit, null, this);
-        //this.game.physics.arcade.collide(this.player, this.sun, this.playerSunHit, null, this);
         this.game.physics.arcade.collide(this.missiles, this.planets, this.missilePlanetHit, null, this);
         this.game.physics.arcade.collide(this.asteroids, this.planets, this.asteroidPlanetHit, null, this);
         this.game.physics.arcade.collide(this.player, this.bullets, this.playerBulletHit, null, this);
@@ -778,7 +775,6 @@ StarPatrol.Game.prototype = {
         this.game.physics.arcade.collide(this.asteroids, this.bullets, this.asteroidBulletHit, null, this);
         this.game.physics.arcade.collide(this.missiles, this.bullets, this.missileBulletHit, null, this);
         this.game.physics.arcade.collide(this.alien, this.asteroids, this.alienAsteroidHit, null, this);
-        this.game.physics.arcade.collide(this.alien, this.planets, this.alienPlanetHit, null, this);
         this.game.physics.arcade.collide(this.train, this.bullets, this.bulletTrainHit, null, this);
     },
 
@@ -886,28 +882,6 @@ StarPatrol.Game.prototype = {
         this.train.health -= this.BULLET_DAMAGE;
     },
 
-    playerSunHit: function() {
-        if (this.player.isShielded){
-            this.boingSound.play('', 0, 0.1, false);
-            this.player.shieldStrength -= 50;
-            return;
-        }
-
-        this.explosionSound.play('', 0, 0.2, false, true);
-        this.killPlayer();
-    },
-
-    playerPlanetHit: function () {
-        if (this.player.isShielded){
-            this.boingSound.play('', 0, 0.1, false);
-            this.player.shieldStrength -= 20;
-            return;
-        }
-
-        this.explosionSound.play('', 0, 0.2, false, true);
-        this.killPlayer();
-    },
-
     missilePlanetHit: function (missile, planet) {
         this.detonate(missile, true, 100);
     },
@@ -937,9 +911,6 @@ StarPatrol.Game.prototype = {
         this.alien.health -= this.ASTEROID_DAMAGE;
     },
 
-    alienPlanetHit: function(alien, planet) {
-    },
-
     planetBulletHit: function(planet, bullet) {
         this.detonate(bullet, true, 100);
     },
@@ -955,13 +926,14 @@ StarPatrol.Game.prototype = {
     },
 
     playerBulletHit: function (player, bullet) {
-        this.detonate(bullet, true, 50);
 
         if (this.player.isShielded){
             this.boingSound.play('', 0, 0.1, false);
             this.player.shieldStrength -= this.BULLET_DAMAGE;
+            bullet.destroy();
             return;
         }
+        this.detonate(bullet, true, 50);
         this.player.health -= this.BULLET_DAMAGE;
 
         // if player collides with anything while warping, kill him
