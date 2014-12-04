@@ -5,7 +5,7 @@ StarPatrol.Game = function(){
 
     // Scaled physics and values based on this.GAME_SCALE
     this.GAME_SCALE = 0.2;
-    this.GAMESIZE = this.GAME_SCALE * 600000;
+    this.GAMESIZE = this.GAME_SCALE * 750000;
     this.MAXVELOCITY = this.GAME_SCALE * 2400;
     this.WARPVELOCITY = this.MAXVELOCITY * 6;
     this.MAXTHRUST = this.GAME_SCALE * 30;
@@ -23,7 +23,7 @@ StarPatrol.Game = function(){
     this.alienScale = this.GAME_SCALE;
     this.planetScale = this.GAME_SCALE * 12;
     this.earthRadius = this.planetScale * 125 * 0.5;
-    this.mapPlanetScale = this.GAME_SCALE * 50;
+    this.mapPlanetScale = this.GAME_SCALE * 70;
     this.BULLETLOCKDISTANCE = this.GAME_SCALE * 1200;
     this.BULLETACCELERATION = this.GAME_SCALE * 1200;
     this.MAXBULLETSPEED = this.GAME_SCALE * 4000;
@@ -197,13 +197,13 @@ StarPatrol.Game.prototype = {
         // Train parameters
         this.train = this.add.sprite(0, this.world.centerY, 'train');
         this.train.anchor.setTo(0, 0.5);
-        this.train.scale.setTo(this.playerScale * 6);
+        this.train.scale.setTo(this.playerScale * 5);
         this.game.physics.arcade.enableBody(this.train);
         this.train.health = this.MAXHEALTH;
         this.train.map = this.add.sprite(this.game.width - this.mapSize - this.mapOffset + parseInt(this.train.x * this.mapGameRatio), parseInt(this.train.y * this.mapGameRatio) + this.mapOffset, 'trainmap');
         this.train.map.fixedToCamera = true;
-        this.train.map.anchor.setTo(0.5);
-        this.train.map.scale.setTo(3);
+        this.train.map.anchor.setTo(0);
+        this.train.map.scale.setTo(1);
         this.train.map.animations.add('tracking', [0,1]);
         this.train.map.animations.play('tracking', 10, true);
         this.train.body.bounce.set(0.4);
@@ -372,6 +372,7 @@ StarPatrol.Game.prototype = {
         this.train.map.fixedToCamera = false;
         this.train.map.x = this.game.width - this.mapSize + parseInt(this.train.x * this.mapGameRatio) - this.mapOffset;
         this.train.map.y = parseInt(this.train.y * this.mapGameRatio) + this.mapOffset;
+        this.train.map.angle = this.train.angle;
         this.train.map.fixedToCamera = true;
         this.train.map.bringToTop();
     },
