@@ -27,8 +27,8 @@ StarPatrol.Game = function(){
     this.BULLETLOCKDISTANCE = this.GAME_SCALE * 1200;
     this.BULLETACCELERATION = this.GAME_SCALE * 1200;
     this.MAXBULLETSPEED = this.GAME_SCALE * 4000;
-    this.MAXBULLETDISTANCE = this.GAME_SCALE * 1600;
-    this.MAXTRACTORBEAMDISTANCE = this.GAME_SCALE * 3200;
+    this.MAXBULLETDISTANCE = this.GAME_SCALE * 2400;
+    this.MAXTRACTORBEAMDISTANCE = this.GAME_SCALE * 3600;
     this.TRACTORBEAMFORCE = this.GAME_SCALE * 2400;
     this.MINSAFEWARPDISTANCE = this.GAME_SCALE * 3200;
 
@@ -195,10 +195,25 @@ StarPatrol.Game.prototype = {
         this.player.hasNotThrustYet = true;
 
         // Train parameters
-        this.train = this.add.sprite(0, this.world.centerY, 'train');
-        this.train.anchor.setTo(0, 0.5);
-        this.train.scale.setTo(this.playerScale * 5);
+        this.train = this.add.sprite(0, this.world.centerY, 'train-head');
+        this.train.numCars = 20;
+        this.train.anchor.setTo(0.5);
+        this.train.scale.setTo(this.playerScale * 2);
+        this.train.caboose = this.add.sprite(0, this.world.centerY, 'caboose');
+        this.train.caboose.anchor.setTo(0.5);
+        this.train.caboose.scale.setTo(this.playerScale * 2);
+        this.train.target = this.add.sprite(0, this.world.centerY, 'target');
+        this.train.caboose.target = this.add.sprite(0, this.world.centerY, 'target');
+
+        this.train.cars = game.add.group();
+        for (var i = 0; i < this.train.numCars; i++)
+        {
+            var car = this.train.cars.create(0, this.world.centerY, 'cargo-pod');
+            car.anchor.setTo(0.5);
+            car.scale.setTo(this.playerScale * 2);
+        }
         this.game.physics.arcade.enableBody(this.train);
+        this.game.physics.arcade.enableBody(this.train.caboose);
         this.train.health = this.MAXHEALTH;
         this.train.map = this.add.sprite(this.game.width - this.mapSize - this.mapOffset + parseInt(this.train.x * this.mapGameRatio), parseInt(this.train.y * this.mapGameRatio) + this.mapOffset, 'trainmap');
         this.train.map.fixedToCamera = true;
@@ -367,8 +382,26 @@ StarPatrol.Game.prototype = {
     },
 
     updateTrainPosition: function() {
-        this.train.rotation = game.physics.arcade.angleBetween(this.train, this.earth);
+        //this.train.rotation = game.physics.arcade.angleBetween(this.train, this.earth);
         this.game.physics.arcade.moveToObject(this.train, this.earth, this.TRAINSPEED);
+        var counter = 0;
+        this.train.cars.forEach(function (car) {
+            //this.train.cars.children[counter - 1].x = this.train.cargo1.x - (counter * this.train.cargo1.width);
+            var offset = this.train.width * 0.5 + car.width * 0.5 + car.width * (counter - 1);
+            car.x = this.train.x - offset;
+            car.y = this.train.y;
+            counter++;
+            if (counter == this.train.cars.length){
+                this.train.caboose.x = this.train.x - offset - this.train.caboose.width * 0.5 - car.width * 0.5;
+                this.train.caboose.y = this.train.y;
+            }
+        }, this);
+        this.train.target.x = this.train.x + this.train.width * 1.5;
+        this.train.target.y = this.train.y;
+        this.train.caboose.target.x = this.train.caboose.x - this.train.caboose.width * 0.1;
+        this.train.caboose.target.y = this.train.caboose.y;
+        //this.train.cargo1.angle = this.train.angle;
+        //this.train.cargo2.angle = this.train.angle;
         this.train.map.fixedToCamera = false;
         this.train.map.x = this.game.width - this.mapSize + parseInt(this.train.x * this.mapGameRatio) - this.mapOffset;
         this.train.map.y = parseInt(this.train.y * this.mapGameRatio) + this.mapOffset;
@@ -643,25 +676,27 @@ StarPatrol.Game.prototype = {
         if (this.alien.isAttacking) {
             // Alien chases ship
             this.alien.rotation = game.physics.arcade.angleBetween(this.alien, this.alien.target);
-            this.game.physics.arcade.moveToObject(this.alien, this.alien.target, this.ALIENSPEED, 1200);
+            this.game.physics.arcade.moveToObject(this.alien, this.alien.attackLocation, this.ALIENSPEED, 1200);
 
             // Use tractor beam
-            if (!this.alien.isTractorBeamOn && this.alien.tractorBeam >= 90 && this.game.physics.arcade.distanceBetween(this.alien, this.alien.target) < this.MAXTRACTORBEAMDISTANCE) {
-                this.alien.isTractorBeamOn = true;
-                this.alien.animations.play('attract', 20, true);
-                this.tractorBeamSound.play('', 0, 0.1, true, true);
-            }
-            if (this.alien.isTractorBeamOn){
-                this.alien.tractorBeam -= 0.6;
-                this.alien.target.body.allowGravity = true;
-                this.alien.target.body.gravity = new Phaser.Point(this.alien.x - this.alien.target.x, this.alien.y - this.alien.target.y);
-                this.alien.target.body.gravity = this.player.body.gravity.normalize().multiply(this.TRACTORBEAMFORCE, this.TRACTORBEAMFORCE);
-            }
-            if (this.alien.tractorBeam < 10 || this.game.physics.arcade.distanceBetween(this.alien, this.alien.target) > this.MAXTRACTORBEAMDISTANCE) {
-                this.alien.isTractorBeamOn = false;
-                this.alien.animations.play('cruise', 20);
-                this.alien.target.body.allowGravity = false;
-                this.tractorBeamSound.stop();
+            if (this.alien.target == this.player) {
+                if (!this.alien.isTractorBeamOn && this.alien.tractorBeam >= 90 && this.game.physics.arcade.distanceBetween(this.alien, this.alien.target) < this.MAXTRACTORBEAMDISTANCE) {
+                    this.alien.isTractorBeamOn = true;
+                    this.alien.animations.play('attract', 20, true);
+                    this.tractorBeamSound.play('', 0, 0.1, true, true);
+                }
+                if (this.alien.isTractorBeamOn) {
+                    this.alien.tractorBeam -= 0.6;
+                    this.alien.target.body.allowGravity = true;
+                    this.alien.target.body.gravity = new Phaser.Point(this.alien.x - this.alien.target.x, this.alien.y - this.alien.target.y);
+                    this.alien.target.body.gravity = this.player.body.gravity.normalize().multiply(this.TRACTORBEAMFORCE, this.TRACTORBEAMFORCE);
+                }
+                if (this.alien.tractorBeam < 10 || this.game.physics.arcade.distanceBetween(this.alien, this.alien.target) > this.MAXTRACTORBEAMDISTANCE) {
+                    this.alien.isTractorBeamOn = false;
+                    this.alien.animations.play('cruise', 20);
+                    this.alien.target.body.allowGravity = false;
+                    this.tractorBeamSound.stop();
+                }
             }
 
             // Fire heat seeking bullet
@@ -678,7 +713,7 @@ StarPatrol.Game.prototype = {
             this.alien.beganRetreat = false;
             this.alien.retreatedOnceAlready = true;
             this.alien.body.allowGravity = false;
-            // LAME LAME PHASER @todo actually get chaining to work
+            // LAME LAME @todo actually get chaining to work
             this.add.tween(this.alien).to({angle: this.alien.angle + 180}, 250, Phaser.Easing.Linear.None)
                 .start()
                 .onComplete.add(function(){
@@ -777,6 +812,8 @@ StarPatrol.Game.prototype = {
         this.game.physics.arcade.collide(this.missiles, this.bullets, this.missileBulletHit, null, this);
         this.game.physics.arcade.collide(this.alien, this.asteroids, this.alienAsteroidHit, null, this);
         this.game.physics.arcade.collide(this.train, this.bullets, this.bulletTrainHit, null, this);
+        this.game.physics.arcade.collide(this.train.caboose, this.bullets, this.bulletCabooseHit, null, this);
+
     },
 
     createMissile: function(x, y, angle) {
@@ -822,11 +859,28 @@ StarPatrol.Game.prototype = {
         if (alien) {
             alien.reset(x, y);
             alien.revive();
-            alien.target = this.train;
         } else {
             alien = new Alien(this.game, x, y, this.MAXCHARGE, this.MAXHEALTH, this.alienScale);
-            alien.target = this.train;
         }
+
+        // Pick target
+        var target = this.game.rnd.integerInRange(1, 3);
+
+        switch (target) {
+            case 1:
+                alien.target = this.train;
+                alien.attackLocation = this.train.target;
+                break;
+            case 2:
+                alien.target = this.train.caboose;
+                alien.attackLocation = this.train.caboose.target;
+                break;
+            case 3:
+                alien.target = this.player;
+                alien.attackLocation = this.player;
+                break;
+        }
+
         return alien;
     },
 
@@ -879,6 +933,11 @@ StarPatrol.Game.prototype = {
     },
 
     bulletTrainHit: function(train, bullet) {
+        this.detonate(bullet, true, 100);
+        this.train.health -= this.BULLET_DAMAGE;
+    },
+
+    bulletCabooseHit: function(caboose, bullet) {
         this.detonate(bullet, true, 100);
         this.train.health -= this.BULLET_DAMAGE;
     },
