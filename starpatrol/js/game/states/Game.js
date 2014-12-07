@@ -15,6 +15,7 @@ StarPatrol.Game = function(){
     this.GRAVITYRANGE = this.GAME_SCALE * 4000;
     this.MISSILESPEED = this.GAME_SCALE * 2000;
     this.MISSILESCALE = this.GAME_SCALE * 0.3;
+    this.NUKESCALE = this.GAME_SCALE * 0.5;
     this.BULLETSCALE = this.GAME_SCALE * 0.2;
     this.ASTEROIDSCALE = this.GAME_SCALE * 2;
     this.EXPLOSIONSCALE = this.GAME_SCALE * 6;
@@ -26,6 +27,8 @@ StarPatrol.Game = function(){
     this.mapPlanetScale = this.GAME_SCALE * 70;
     this.BULLETLOCKDISTANCE = this.GAME_SCALE * 1200;
     this.BULLETACCELERATION = this.GAME_SCALE * 1200;
+    this.NUKEACCELERATION = this.GAME_SCALE * 600;
+    this.MAXNUKESPEED = this.GAME_SCALE * 6000;
     this.MAXBULLETSPEED = this.GAME_SCALE * 4000;
     this.MAXBULLETDISTANCE = this.GAME_SCALE * 2400;
     this.MAXTRACTORBEAMDISTANCE = this.GAME_SCALE * 3600;
@@ -69,6 +72,7 @@ StarPatrol.Game = function(){
     this.TOTALALIENS = 1; // How many appear at any one time
     this.aliensKilled = 0;
     this.orbitSpeedModifier = 2;
+    this.nukeTurnRate = 0.2;
 };
 
 StarPatrol.Game.prototype = {
@@ -168,7 +172,7 @@ StarPatrol.Game.prototype = {
         this.sun.map.fixedToCamera = true;
 
         // Player parameters
-        this.player = this.add.sprite(1000, this.world.centerY, 'player');
+        this.player = this.add.sprite(0, this.world.centerY - 100, 'player');
         this.player.map = this.add.sprite(this.game.width - this.mapSize - this.mapOffset + parseInt(this.player.x * this.mapGameRatio), parseInt(this.player.y * this.mapGameRatio) + this.mapOffset, 'playermap');
         this.player.anchor.setTo(0.5);
         this.player.scale.setTo(this.playerScale);
@@ -193,6 +197,7 @@ StarPatrol.Game.prototype = {
         this.player.checkWorldBounds = true;
         this.player.body.collideWorldBounds = true;
         this.player.hasNotThrustYet = true;
+        this.player.numNukes = 10;
 
         // Train parameters
         this.train = this.add.sprite(0, this.world.centerY, 'train-head');
@@ -212,12 +217,14 @@ StarPatrol.Game.prototype = {
             car.anchor.setTo(0.5);
             car.scale.setTo(this.playerScale * 2);
         }
+        this.train.x = this.train.numCars * this.train.width;
+        this.player.x = this.train.x;
         this.game.physics.arcade.enableBody(this.train);
         this.game.physics.arcade.enableBody(this.train.caboose);
         this.train.health = this.MAXHEALTH;
         this.train.map = this.add.sprite(this.game.width - this.mapSize - this.mapOffset + parseInt(this.train.x * this.mapGameRatio), parseInt(this.train.y * this.mapGameRatio) + this.mapOffset, 'trainmap');
         this.train.map.fixedToCamera = true;
-        this.train.map.anchor.setTo(0);
+        this.train.map.anchor.setTo(1);
         this.train.map.scale.setTo(1);
         this.train.map.animations.add('tracking', [0,1]);
         this.train.map.animations.play('tracking', 10, true);
@@ -255,6 +262,10 @@ StarPatrol.Game.prototype = {
         this.missiles = this.game.add.group();
         this.missiles.setAll('anchor.x', 0.5);
         this.missiles.setAll('anchor.y', 0.5);
+
+        this.nukes = this.game.add.group();
+        this.nukes.setAll('anchor.x', 0.5);
+        this.nukes.setAll('anchor.y', 0.5);
 
         this.bullets = this.game.add.group();
 
@@ -327,7 +338,9 @@ StarPatrol.Game.prototype = {
         this.cursors = game.input.keyboard.createCursorKeys();
         this.spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
         this.shiftkey = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
+        this.nKey = game.input.keyboard.addKey(Phaser.Keyboard.N);
         this.spacebar.onDown.add(this.fireMissile,this);
+        this.nKey.onDown.add(this.fireNuke,this);
     },
 
     update: function() {
@@ -416,7 +429,7 @@ StarPatrol.Game.prototype = {
         var earth_y = this.earth.y + this.earthRadius;
         this.distanceFromEarth = Math.sqrt(Math.pow(earth_x - this.train.x, 2) + Math.pow(earth_y - this.train.y, 2));
 
-        if (this.distanceFromEarth < this.GRAVITYRANGE * 4) {
+        if (this.distanceFromEarth < this.GRAVITYRANGE) {
             this.gameMusic.stop();
             this.warpLoopSound.stop();
             this.player.isAlive = false;
@@ -438,21 +451,6 @@ StarPatrol.Game.prototype = {
         this.aliensKilledText.text = 'Aliens Killed: ' + this.aliensKilled;
     },
 
-    updatePosition: function(sprite) {
-        // Check if sprite crossed world bounds and update position if true
-        if (sprite.x > this.world.width){
-            sprite.x = 0;
-        }
-        if (sprite.x < 0){
-            sprite.x = this.world.width;
-        }
-        if (sprite.y > this.world.height){
-            sprite.y = 0;
-        }
-        if (sprite.y < 0){
-            sprite.y = this.world.height;
-        }
-    },
 
     updateHealth: function() {
         // Update player health
@@ -465,9 +463,17 @@ StarPatrol.Game.prototype = {
             this.player.turnIncrement = this.MAXTURNINCREMENT * 0.5;
             this.player.maxTurnRate = this.MAXTURNRATE * 0.5;
         }
-        if (this.player.health <= 0 || this.train.health <= 0) {
+        if (this.train.health <= 0) {
             this.detonate(this.train);
-            this.killPlayer();
+            this.detonate(this.train.caboose);
+            this.train.cars.forEach(function(car){
+                this.detonate(car);
+            }, this);
+            this.killPlayer(false);
+        }
+
+        if (this.player.health <= 0) {
+            this.killPlayer(true);
         }
 
         // Subtract health if shield was brought below zero
@@ -511,7 +517,20 @@ StarPatrol.Game.prototype = {
 
         // if player fires missile while warping, kill him
         if (this.player.isWarping) {
-            this.killPlayer();
+            this.killPlayer(true);
+        }
+    },
+
+    fireNuke: function () {
+        if (this.player.numNukes > 0) {
+            this.player.numNukes--;
+            this.missileSound.play('', 0, 0.1, false, true);
+            this.createNuke(this.player.x, this.player.y, this.player.angle);
+
+            // if player fires nuke while warping, kill him
+            if (this.player.isWarping) {
+                this.killPlayer(true);
+            }
         }
     },
 
@@ -529,11 +548,11 @@ StarPatrol.Game.prototype = {
         }
         // Check if player overused warp drive and kill him
         if (this.player.isWarping && this.warpDrive < 0){
-            this.killPlayer();
+            this.killPlayer(true);
         }
         // Check if player is warping too close to tractor beam being used on him
         if (this.player.isWarping && this.alien.isTractorBeamOn && this.alien.target == this.player && this.game.physics.arcade.distanceBetween(this.alien, this.player) < this.MINSAFEWARPDISTANCE){
-            this.killPlayer();
+            this.killPlayer(true);
         }
         // use shields
         if (this.shiftkey.isDown && !this.player.isWarping && this.player.charge > 0 && this.player.shieldStrength > 0){
@@ -648,9 +667,38 @@ StarPatrol.Game.prototype = {
         // Player missile
         this.missiles.forEach(function (missile) {
             if (missile) {
-                this.updatePosition(missile);
                 if (missile.lifespan < this.game.time.now) {
                     this.detonate(missile, true, 100);
+                }
+            }
+        }, this);
+
+        // Player nuke
+        this.nukes.forEach(function (nuke) {
+            if (nuke) {
+                if (this.game.physics.arcade.distanceBetween(nuke, this.player) > 100 || nuke.lockedOn == true) {
+                    nuke.lockedOn = true;
+
+                    if (parseInt(nuke.angle) < parseInt(this.game.physics.arcade.angleBetween(nuke, this.alien) * (180 / Math.PI))) {
+                        nuke.angle += this.nukeTurnRate*20;
+                    }
+                    if (parseInt(nuke.angle) > parseInt(this.game.physics.arcade.angleBetween(nuke, this.alien) * (180 / Math.PI))) {
+                        nuke.angle -= this.nukeTurnRate*20;
+                    }
+
+                    //if (this.game.physics.arcade.distanceBetween(nuke, this.alien) > this.BULLETLOCKDISTANCE * 2){
+                    //    this.game.physics.arcade.accelerateToObject(nuke, this.alien, this.NUKEACCELERATION, this.MAXNUKESPEED, this.MAXNUKESPEED);
+                    //} else {
+                    //    this.game.physics.arcade.moveToObject(nuke, this.alien, this.MAXNUKESPEED);
+                    //}
+
+                    var x_component = Math.cos((nuke.angle) * Math.PI / 360);
+                    var y_component = Math.sin((nuke.angle) * Math.PI / 360);
+                    nuke.body.velocity.x = 500 * x_component;
+                    nuke.body.velocity.y = 500 * y_component;
+                }
+                if (nuke.lifespan < this.game.time.now) {
+                    this.detonate(nuke, true, 100);
                 }
             }
         }, this);
@@ -658,7 +706,6 @@ StarPatrol.Game.prototype = {
         // Alien heat seeking bullet
         this.bullets.forEach(function (bullet) {
             if (bullet) {
-                this.updatePosition(bullet);
                 if (this.game.physics.arcade.distanceBetween(bullet, this.alien.target) > this.BULLETLOCKDISTANCE) {
                     this.game.physics.arcade.accelerateToObject(bullet, this.alien.target, this.BULLETACCELERATION, this.MAXBULLETSPEED, this.MAXBULLETSPEED);
                 } else {
@@ -736,12 +783,6 @@ StarPatrol.Game.prototype = {
         if (this.asteroids.countLiving() < this.TOTALASTEROIDS) {
             this.createAsteroid();
         }
-
-        this.asteroids.forEach(function (asteroid) {
-           if (asteroid){
-               this.updatePosition(asteroid);
-           }
-        }, this);
     },
 
     applyGravity: function() {
@@ -804,6 +845,7 @@ StarPatrol.Game.prototype = {
         this.game.physics.arcade.collide(this.player, this.asteroids, this.playerAsteroidHit, null, this);
         this.game.physics.arcade.collide(this.player, this.alien, this.playerAlienHit, null, this);
         this.game.physics.arcade.collide(this.missiles, this.alien, this.missileAlienHit, null, this);
+        this.game.physics.arcade.collide(this.nukes, this.alien, this.nukeAlienHit, null, this);
         this.game.physics.arcade.collide(this.missiles, this.planets, this.missilePlanetHit, null, this);
         this.game.physics.arcade.collide(this.asteroids, this.planets, this.asteroidPlanetHit, null, this);
         this.game.physics.arcade.collide(this.player, this.bullets, this.playerBulletHit, null, this);
@@ -817,11 +859,18 @@ StarPatrol.Game.prototype = {
     },
 
     createMissile: function(x, y, angle) {
-        var missile = new Missile(this.game, this.MISSILESCALE, this.MISSILESPEED, x, y, angle);
+        var missile = new Missile(this.game, this.MISSILESCALE, this.MISSILESPEED,this.player.body.velocity.x, this.player.body.velocity.y, x, y, angle);
         this.missiles.add(missile);
         missile.checkWorldBounds = true;
         missile.reset(this.player.x, this.player.y);
         missile.revive();
+    },
+
+    createNuke: function(x, y, angle) {
+        var nuke = new Nuke(this.game, this.NUKESCALE, this.player.body.velocity.x, this.player.body.velocity.y, x, y, angle);
+        this.nukes.add(nuke);
+        nuke.reset(this.player.x, this.player.y);
+        nuke.revive();
     },
 
     createBullet: function(x, y) {
@@ -960,10 +1009,16 @@ StarPatrol.Game.prototype = {
         this.detonate(missile, true, 50);
         this.alien.health -= this.MISSILE_DAMAGE;
         this.alien.target = this.player;
+        this.alien.attackLocation = this.player;
         if (!this.alien.retreatedOnceAlready){
             this.alien.isAttacking = false;
             this.alien.beganRetreat = true;
         }
+    },
+
+    nukeAlienHit: function(alien, nuke) {
+        this.detonate(nuke, true, 50);
+        this.alien.health = 0;
     },
 
     alienAsteroidHit: function(alien, asteroid) {
@@ -998,7 +1053,7 @@ StarPatrol.Game.prototype = {
 
         // if player collides with anything while warping, kill him
         if (this.player.isWarping){
-            this.killPlayer();
+            this.killPlayer(true);
         }
     },
 
@@ -1015,7 +1070,7 @@ StarPatrol.Game.prototype = {
 
         // if player collides with anything while warping, kill him
         if (this.player.isWarping){
-            this.killPlayer();
+            this.killPlayer(true);
         }
     },
 
@@ -1024,18 +1079,23 @@ StarPatrol.Game.prototype = {
 
         // if player collides with anything while warping, kill him
         if (this.player.isWarping){
-            this.killPlayer();
+            this.killPlayer(true);
         }
     },
 
-    killPlayer: function(){
+    killPlayer: function(playerKilled){
         this.player.isAlive = false;
         this.gameMusic.stop();
         this.tractorBeamSound.stop();
         this.explosionSound.play('', 0, 1, false, true);
-        var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
-        bigExplosionAnimation.reset(this.player.x, this.player.y);
-        this.player.kill();
+        if (playerKilled) {
+            var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
+            bigExplosionAnimation.reset(this.player.x, this.player.y);
+            this.player.kill();
+        } else {
+            var bigExplosionAnimation = this.bigExplosions.getFirstExists(false);
+            bigExplosionAnimation.reset(this.train.x, this.train.y);
+        }
         bigExplosionAnimation.play('big-explosion', 20, false, true).onComplete.add(function () {
             this.game.world.bounds = new Phaser.Rectangle(0, 0, this.game.width, this.game.height);
             this.game.camera.setBoundsToWorld();

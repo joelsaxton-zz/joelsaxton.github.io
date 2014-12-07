@@ -2,7 +2,7 @@
  * Created by joelsaxton on 11/9/14.
  */
 
-var Missile = function(game, missileScale, missileSpeed, x, y, angle, key, frame){
+var Missile = function(game, missileScale, missileSpeed, player_xvel, player_yvel, x, y, angle, key, frame){
     key = 'missile';
     Phaser.Sprite.call(this, game, x, y, key, frame);
 
@@ -17,6 +17,8 @@ var Missile = function(game, missileScale, missileSpeed, x, y, angle, key, frame
     this.outOfBoundsKill = false;
     this.missileLifeSpan = 6000;
     this.events.onRevived.add(this.onRevived, this);
+    this.xvel = player_xvel;
+    this.yvel = player_yvel;
 };
 
 Missile.prototype = Object.create(Phaser.Sprite.prototype);
@@ -24,7 +26,7 @@ Missile.prototype.constructor = Missile;
 
 Missile.prototype.onRevived = function() {
     this.lifespan = this.game.time.now + this.missileLifeSpan;
-    this.body.velocity.x = this.missileSpeed * Math.cos((this.angle + 270) * Math.PI / 180);
-    this.body.velocity.y = this.missileSpeed * Math.sin((this.angle + 270) * Math.PI / 180);
+    this.body.velocity.x = (this.missileSpeed + Math.abs(this.xvel)) * Math.cos((this.angle + 270) * Math.PI / 180);
+    this.body.velocity.y = (this.missileSpeed + Math.abs(this.yvel)) * Math.sin((this.angle + 270) * Math.PI / 180);
     this.animations.play('missile', 5, true);
 };

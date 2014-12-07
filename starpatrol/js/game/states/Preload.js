@@ -21,6 +21,8 @@ StarPatrol.Preload.prototype = {
         this.load.image('scoreboard-fail', 'assets/images/scoreboard-fail.png');
         this.load.image('scoreboard-win', 'assets/images/scoreboard-win.png');
         this.load.spritesheet('missile', 'assets/images/missile-spritesheet.png', 100, 400, 4);
+        //this.load.spritesheet('nuke', 'assets/images/nuke.png', 85, 500, 3);
+        this.load.spritesheet('nuke', 'assets/images/nuke2.png', 484, 86, 1);
         this.load.spritesheet('player', 'assets/images/ship-spritesheet.png', 100, 300, 16);
         this.load.spritesheet('asteroid', 'assets/images/asteroid-spritesheet.png', 140, 140, 1);
         this.load.spritesheet('explosion', 'assets/images/explosion-spritesheet.png', 64, 64, 23);
@@ -47,7 +49,7 @@ StarPatrol.Preload.prototype = {
         this.load.spritesheet('caboose', 'assets/images/caboose.png', 1120, 430, 1);
         this.load.spritesheet('target', 'assets/images/target.png', 1, 1, 1);
 
-        this.load.audio('gameMusic', ['assets/audio/Pamgaea.mp3', 'assets/audio/Pamgaea.ogg']);
+        this.load.audio('gameMusic', ['assets/audio/music.mp3', 'assets/audio/music.ogg']);
         this.load.audio('missile', 'assets/audio/missile.wav');
         this.load.audio('bullet', 'assets/audio/blip.wav');
         this.load.audio('rocket', 'assets/audio/rocket.wav');
