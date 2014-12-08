@@ -20,10 +20,11 @@ StarPatrol.Preload.prototype = {
         this.load.image('background', 'assets/images/tiles/star-background.png');
         this.load.image('scoreboard-fail', 'assets/images/scoreboard-fail.png');
         this.load.image('scoreboard-win', 'assets/images/scoreboard-win.png');
-        this.load.spritesheet('missile', 'assets/images/missile-spritesheet.png', 100, 400, 4);
-        //this.load.spritesheet('nuke', 'assets/images/nuke.png', 85, 500, 3);
-        this.load.spritesheet('nuke', 'assets/images/nuke2.png', 484, 86, 1);
-        this.load.spritesheet('player', 'assets/images/ship-spritesheet.png', 100, 300, 16);
+        this.load.spritesheet('missile', 'assets/images/missile-spritesheet.png', 100, 600, 8);
+        this.load.spritesheet('plasma', 'assets/images/plasma.png', 200, 200, 3);
+        //this.load.spritesheet('player', 'assets/images/ship-spritesheet.png', 100, 300, 16);
+        this.load.spritesheet('player', 'assets/images/new-ship.png', 140, 180, 2);
+        this.load.spritesheet('shadow', 'assets/images/new-ship-shadow.png', 126, 172, 1);
         this.load.spritesheet('asteroid', 'assets/images/asteroid-spritesheet.png', 140, 140, 1);
         this.load.spritesheet('explosion', 'assets/images/explosion-spritesheet.png', 64, 64, 23);
         this.load.spritesheet('big-explosion', 'assets/images/big-explosion-spritesheet.png', 128, 128, 23);
@@ -50,10 +51,11 @@ StarPatrol.Preload.prototype = {
         this.load.spritesheet('target', 'assets/images/target.png', 1, 1, 1);
 
         this.load.audio('gameMusic', ['assets/audio/music.mp3', 'assets/audio/music.ogg']);
-        this.load.audio('missile', 'assets/audio/missile.wav');
+        this.load.audio('missile', 'assets/audio/missile-new.wav');
         this.load.audio('bullet', 'assets/audio/blip.wav');
         this.load.audio('rocket', 'assets/audio/rocket.wav');
         this.load.audio('explosion', 'assets/audio/explosion.wav');
+        this.load.audio('big-explosion', 'assets/audio/big-explosion.wav');
         this.load.audio('youblewit', 'assets/audio/youblewit.wav');
         this.load.audio('warp-start', 'assets/audio/warp-start.wav');
         this.load.audio('warp', 'assets/audio/warp.wav');
@@ -63,6 +65,8 @@ StarPatrol.Preload.prototype = {
         this.load.audio('boing', 'assets/audio/boing.wav');
         this.load.audio('applause', 'assets/audio/applause.wav');
         this.load.audio('tractor-beam', 'assets/audio/tractor-beam.wav');
+        this.load.audio('bending', 'assets/audio/bending.wav');
+        this.load.audio('nuke', 'assets/audio/nuke.wav');
 
         this.load.bitmapFont('minecraftia', 'assets/fonts/minecraftia/minecraftia.png', 'assets/fonts/minecraftia/minecraftia.xml');
         this.load.onLoadComplete.add(this.onLoadComplete, this);
