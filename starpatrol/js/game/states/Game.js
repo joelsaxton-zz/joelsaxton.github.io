@@ -69,6 +69,7 @@ StarPatrol.Game = function(){
     this.TOTALALIENS = 1; // How many appear at any one time
     this.aliensKilled = 0;
     this.orbitSpeedModifier = 2;
+    this.gameOver = false;
 };
 
 StarPatrol.Game.prototype = {
@@ -349,37 +350,39 @@ StarPatrol.Game.prototype = {
     },
 
     update: function() {
-        if (this.player.isAlive){
-            this.updateAllText();
-            this.updateCamera();
-            this.checkPlayerInputs();
+        if (!this.gameOver) {
+            if (this.player.isAlive){
+                this.updateAllText();
+                this.updateCamera();
+                this.checkPlayerInputs();
 
-            // Constrain velocity
-            if (this.player.isWarping){
-                this.constrainVelocity(this.player, this.WARPVELOCITY);
-            } else {
-                this.constrainVelocity(this.player, this.player.maxVelocity);
+                // Constrain velocity
+                if (this.player.isWarping){
+                    this.constrainVelocity(this.player, this.WARPVELOCITY);
+                } else {
+                    this.constrainVelocity(this.player, this.player.maxVelocity);
+                }
+
+                this.applyGravity();
+                this.updateTimers();
+                this.checkCollisions();
+                this.updateAsteroids();
+                this.updateHealth();
+                this.updatePlanetPositions();
+                this.updateTrainPosition();
+                this.updateMapAndShadowPositions();
+                this.alien.bringToTop();
+                this.player.bringToTop();
             }
 
-            this.applyGravity();
-            this.updateTimers();
-            this.checkCollisions();
-            this.updateAsteroids();
-            this.updateHealth();
-            this.updatePlanetPositions();
-            this.updateTrainPosition();
-            this.updateMapAndShadowPositions();
-            this.alien.bringToTop();
-            this.player.bringToTop();
-        }
+            if (this.alien.alive){
+                this.updateAlien();
+            }
 
-        if (this.alien.alive){
-            this.updateAlien();
+            this.updateProjectiles();
+            this.updateEpisode();
+            this.checkWin();
         }
-
-        this.updateProjectiles();
-        this.updateEpisode();
-        this.checkWin();
     },
 
     updatePlanetPositions: function() {
@@ -442,6 +445,7 @@ StarPatrol.Game.prototype = {
             var scoreboard = new Scoreboard(this.game);
             scoreboard.show(this.score, this.applauseSound, this.explosionSound, true);
             this.killAlien();
+            this.gameOver = true;
         }
     },
 
@@ -1164,5 +1168,6 @@ StarPatrol.Game.prototype = {
         this.player.isBurning = false;
         this.warpDrive = this.MAXCHARGE;
         this.map.revive();
+        this.gameOver = false;
     }
 }
