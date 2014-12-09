@@ -29,7 +29,7 @@ StarPatrol.Game = function(){
     this.MAXBULLETSPEED = this.GAME_SCALE * 4000;
     this.MAXBULLETDISTANCE = this.GAME_SCALE * 2400;
     this.MAXTRACTORBEAMDISTANCE = this.GAME_SCALE * 3600;
-    this.TRACTORBEAMFORCE = this.GAME_SCALE * 2400;
+    this.TRACTORBEAMFORCE = this.GAME_SCALE * 3200;
     this.MINSAFEWARPDISTANCE = this.GAME_SCALE * 3200;
 
     // Timers
@@ -338,7 +338,7 @@ StarPatrol.Game.prototype = {
         this.applauseSound = this.game.add.audio('applause');
         this.bendingSound = this.game.add.audio('bending');
         this.nukeSound = this.game.add.audio('nuke');
-        this.gameMusic.play('', 0, 0.3, true, true);
+        this.gameMusic.play('', 0, 0.4, true, true);
 
         // Set inputs
         this.cursors = game.input.keyboard.createCursorKeys();
@@ -403,11 +403,9 @@ StarPatrol.Game.prototype = {
     },
 
     updateTrainPosition: function() {
-        //this.train.rotation = game.physics.arcade.angleBetween(this.train, this.earth);
         this.game.physics.arcade.moveToObject(this.train, this.earth, this.TRAINSPEED);
         var counter = 0;
         this.train.cars.forEach(function (car) {
-            //this.train.cars.children[counter - 1].x = this.train.cargo1.x - (counter * this.train.cargo1.width);
             var offset = this.train.width * 0.5 + car.width * 0.5 + car.width * (counter - 1);
             car.x = this.train.x - offset;
             car.y = this.train.y;
@@ -421,8 +419,6 @@ StarPatrol.Game.prototype = {
         this.train.target.y = this.train.y;
         this.train.caboose.target.x = this.train.caboose.x - this.train.caboose.width * 0.1;
         this.train.caboose.target.y = this.train.caboose.y;
-        //this.train.cargo1.angle = this.train.angle;
-        //this.train.cargo2.angle = this.train.angle;
         this.train.map.fixedToCamera = false;
         this.train.map.x = this.game.width - this.mapSize + parseInt(this.train.x * this.mapGameRatio) - this.mapOffset;
         this.train.map.y = parseInt(this.train.y * this.mapGameRatio) + this.mapOffset;
@@ -474,10 +470,12 @@ StarPatrol.Game.prototype = {
         }
         if (this.train.health <= 0) {
             this.killPlayer(false);
+            this.gameOver = true;
         }
 
         if (this.player.health <= 0) {
             this.killPlayer(true);
+            this.gameOver = true;
         }
 
         // Subtract health if shield was brought below zero
