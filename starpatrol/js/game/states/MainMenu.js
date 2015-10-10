@@ -27,7 +27,6 @@ StarPatrol.MainMenu.prototype = {
         this.startText.y = this.game.height / 2 + this.splash.height /2;
     },
     update: function() {
-
         if(this.game.input.activePointer.justPressed()){
             this.game.state.start('Game');
         }

@@ -2,6 +2,13 @@
 var secondsPerYear = 1; // Sol only (for other systems it is seconds per day)
 var sizeFactor = 750;
 var zoom = 1;
+var minBodies = 2;
+var maxBodies = 10;
+var maxBodySize = 24;
+var minBodySize = 1;
+var minStarSize = 10;
+var orbitIntervalMin = 1;
+var orbitIntervalMax = 5;
 
 // Solar system objects
 var systems = {
@@ -23,7 +30,9 @@ var systems = {
         'periods' : [0, 3, 5, 13],
         'colors' : ['red', 'pink', 'orange', 'blue']
     }
-}
+};
+
+var newSystem = null;
 
 // Build solar system, set up vars, set up key event handlers, etc.
 window.onload = function(){
@@ -37,7 +46,7 @@ window.onload = function(){
 
     // Resize or Recreate solar system to fit new screen size or in response to dropdown
     selectedSystem.onchange = window.onresize = buildSolarSystem;
-}
+};
 
 function buildSolarSystem()
 {
@@ -45,7 +54,135 @@ function buildSolarSystem()
     container.innerHTML = '';
     var selected = document.getElementById('choose-system');
     var index = selected.options[selected.selectedIndex].value;
-    var system = systems[index];
+
+    if (index !== 'Random') {
+        buildExistingSolarSystem(systems[index], container);
+    } else {
+        if (!newSystem) {
+            newSystem = buildNewSolarSystem(minBodies, maxBodies, maxBodySize, minBodySize, minStarSize, orbitIntervalMin, orbitIntervalMax);
+        }
+        buildExistingSolarSystem(newSystem, container);
+    }
+
+}
+
+function buildNewSolarSystem(minBodies, maxBodies, maxBodySize, minBodySize, minStarSize, orbitIntervalMin, orbitIntervalMax)
+{
+    var numBodies = generateRandomInt(minBodies,maxBodies);
+    var names = generateBodyNames(numBodies);
+    var bodySizes = generateBodySizes(numBodies, maxBodySize, minBodySize, minStarSize);
+    var orbits = generateOrbits(numBodies, orbitIntervalMin, orbitIntervalMax);
+    var colors = generateColors(numBodies);
+
+    return {
+        'names': names,
+        'bodySizes': bodySizes,
+        'orbitSizes': orbits.orbitSizes,
+        'periods': orbits.periods,
+        'colors': colors
+    };
+}
+
+function generateRandomInt(min, max)
+{
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generateBodyNames(numBodies)
+{
+    var final = [];
+    for (var i = 0; i < numBodies; i++) {
+        final.push(generateName());
+    }
+
+    return final;
+}
+
+function generateName()
+{
+    var startVowels = ['a', 'e', 'i', 'o', 'u'];
+    var vowels = ['a', 'a', 'e', 'e', 'ie', 'ee', 'i', 'i', 'o', 'o', 'ou', 'u', 'y'];
+    var startConsonants = ['b', 'c', 'ch', 'd', 'dr', 'f', 'fl', 'g', 'gr', 'h', 'j' ,'k', 'kl', 'kr', 'l', 'm', 'n', 'p', 'ph', 'qu', 'r', 's', 'st', 'sc', 'qu', 't', 'v', 'w', 'x', 'y', 'z'];
+    var endConsonants = ['b', 'bb', 'c', 'd', 'dd', 'f', 'ff', 'g', 'gh', 'h', 'j' ,'k', 'l', 'm', 'mm', 'n', 'nn', 'p', 'ph', 'pp', 'qu', 'r', 'rt', 'rr', 's', 'st', 't', 'tt', 'v', 'w', 'x', 'y', 'z', 'zz'];
+
+    var name = '';
+    var numSyllables = generateRandomInt(2, 3);
+
+    for (var x = 0; x < numSyllables; x++) {
+        name += generateSyllable(startVowels, vowels, startConsonants, endConsonants);
+    }
+
+    return name;
+}
+
+function generateSyllable(startVowels, vowels, startConsonants, endConsonants)
+{
+    var structures = {
+        1: [startConsonants, vowels, endConsonants],
+        2: [startVowels, endConsonants],
+        3: [startConsonants, vowels],
+        4: [startVowels, startConsonants, startVowels]
+    };
+
+    var index = generateRandomInt(1, 4);
+    var syllableType = structures[index];
+    var syllable = '';
+    for (var fragments in syllableType) {
+        syllable += syllableType[fragments][generateRandomInt(0, syllableType[fragments].length -1)];
+    }
+
+    return syllable;
+}
+
+function generateBodySizes(numBodies, maxBodySize, minBodySize, minStarSize)
+{
+    var sunSize = generateRandomInt(minStarSize, maxBodySize);
+    var bodies = [sunSize];
+
+    for (var x = 1; x < numBodies; x++) {
+        bodies.push(generateRandomInt(minBodySize, sunSize - 4));
+    }
+
+    return bodies;
+}
+
+function generateOrbits(numBodies, orbitIntervalMin, orbitIntervalMax)
+{
+    var periods = [0];
+    var orbitSizes = [0];
+    var orbit = 0;
+    var periodModifier = 1.05;
+
+    for (var x = 1; x < numBodies; x++) {
+        var offset = generateRandomInt(orbitIntervalMin, orbitIntervalMax);
+
+        orbit += offset + orbit;
+        orbitSizes.push(orbit);
+        periods.push((orbit / 5) * periodModifier);
+        periodModifier *= periodModifier;
+    }
+
+    return {
+        periods : periods,
+        orbitSizes : orbitSizes
+    };
+}
+
+function generateColors(numBodies)
+{
+    var planetColors = ['olive', 'orangered', 'tan', 'brown', 'blue', 'orange', 'darkorange', 'green', 'yellow', 'lightgreen', 'gray', 'lightgray', 'purple', 'red'];
+    var starColors = ['blue', 'lightskyblue', 'orange', 'purple', 'yellow', 'white', 'red'];
+    var colors = [starColors[generateRandomInt(0, starColors.length - 1)]];
+
+    for (var x = 1; x < numBodies; x++) {
+        colors.push(planetColors[generateRandomInt(0, planetColors.length - 1)]);
+    }
+
+    return colors;
+}
+
+function buildExistingSolarSystem(system, container)
+{console.log(system);
     var names = system.names;
     var orbitSizes = system.orbitSizes;
     var bodySizes = system.bodySizes;
